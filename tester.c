@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/mman.h>
 #include <unistd.h>
 
 struct thread_options {
@@ -63,6 +64,24 @@ void io_direct_access(int thread_id, size_t block_size, size_t total_size)
 // mmap
 void io_mmap(int thread_id, size_t block_size, size_t total_size)
 {
+    char file_name[32];
+    sprintf(file_name, "%d.io", thread_id);
+    int fd = open(pool_name, O_RDWR);
+    void* dest = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
+    size_t count = total_size / block_size;
+    void* buff;
+    posix_memalign(&buff, block_size, block_size);
+    memset(buff, 0xff, block_size);
+    char* ptr = (char*)dest;
+
+    for (int i = 0; i < count; i++) {
+        memcpy(ptr, buff, block_size);
+        ptr += block_size;
+    }
+
+    free(buff);
+    munmap(dest, total_size);
+    close(fd);
 }
 
 // async (libaio)
