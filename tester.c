@@ -36,6 +36,7 @@ void io_read_write(int thread_id, size_t block_size, size_t total_size)
 
     for (int i = 0; i < count; i++) {
         write(fd, buff, block_size);
+        fsync(fd);
     }
 
     free(buff);
