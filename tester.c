@@ -66,7 +66,7 @@ void io_mmap(int thread_id, size_t block_size, size_t total_size)
 {
     char file_name[32];
     sprintf(file_name, "%d.io", thread_id);
-    int fd = open(pool_name, O_RDWR);
+    int fd = open(file_name, O_RDWR | O_CREAT, 0777);
     void* dest = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
     size_t count = total_size / block_size;
     void* buff;
