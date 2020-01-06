@@ -3,8 +3,8 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 
 struct thread_options {
 public:
@@ -34,6 +34,7 @@ void io_read_write(int thread_id, size_t block_size, size_t total_size)
 
     for (int i = 0; i < count; i++) {
         write(fd, buff, block_size);
+        fsync(fd);
     }
 
     free(buff);
@@ -43,6 +44,19 @@ void io_read_write(int thread_id, size_t block_size, size_t total_size)
 // direct_io
 void io_direct_access(int thread_id, size_t block_size, size_t total_size)
 {
+    char file_name[32];
+    sprintf(file_name, "%d.io", thread_id);
+    int fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
+    size_t count = total_size / block_size;
+    char* buff = (char*)malloc(block_size);
+    memset(buff, 0xff, block_size);
+
+    for (int i = 0; i < count; i++) {
+        write(fd, buff, block_size);
+    }
+
+    free(buff);
+    close(fd);
 }
 
 // mmap
