@@ -76,6 +76,7 @@ void io_mmap(int thread_id, size_t block_size, size_t total_size)
 
     for (int i = 0; i < count; i++) {
         memcpy(ptr, buff, block_size);
+        msync(ptr, block_size, MS_SYNC);
         ptr += block_size;
     }
 
