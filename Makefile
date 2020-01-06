@@ -1,2 +1,2 @@
 all:
-	g++ tester.c -o tester
+	g++ tester.c -o tester -lpthread
