@@ -139,7 +139,7 @@ void* run_benchmark(void* options)
     return NULL;
 }
 
-#define USE_FALLOCATE
+// #define USE_FALLOCATE
 
 int main(int argc, char** argv)
 {
