@@ -103,16 +103,16 @@ void* run_benchmark(void* options)
 
     if (opt->type == IO_READ_WRITE) {
         fd = open(file_name, O_RDWR | O_CREAT, 0777);
-        fallocate(fd, 0, 0, opt->total_size);
+        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
     } else if (opt->type == IO_DIRECT_ACCESS) {
         fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
-        fallocate(fd, 0, 0, opt->total_size);
+        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
     } else if (opt->type == IO_MMAP) {
         fd = open(file_name, O_RDWR | O_CREAT, 0777);
         fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
     } else if (opt->type == IO_LIBAIO) {
         fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
-        fallocate(fd, 0, 0, opt->total_size);
+        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
     }
 
     Timer timer;
