@@ -112,6 +112,8 @@ void* run_benchmark(void* options)
         fd = open(file_name, O_RDWR | O_CREAT, 0777);
         fallocate(fd, 0, 0, opt->total_size);
     } else if (opt->type == IO_LIBAIO) {
+        fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
+        fallocate(fd, 0, 0, opt->total_size);
     }
 
     Timer timer;
