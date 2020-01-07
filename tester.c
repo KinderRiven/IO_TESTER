@@ -102,13 +102,13 @@ void* run_benchmark(void* options)
     sprintf(file_name, "%d.io", opt->thread_id);
 
     if (opt->type == IO_READ_WRITE) {
-        fd = open(file_name, O_RDWR, 0777);
+        fd = open(file_name, O_RDWR | O_CREAT, 0777);
     } else if (opt->type == IO_DIRECT_ACCESS) {
-        fd = open(file_name, O_RDWR | O_DIRECT, 0777);
+        fd = open(file_name, O_RDWR | O_DIRECT | O_CREAT, 0777);
     } else if (opt->type == IO_MMAP) {
-        fd = open(file_name, O_RDWR, 0777);
+        fd = open(file_name, O_RDWR | O_CREAT, 0777);
     } else if (opt->type == IO_LIBAIO) {
-        fd = open(file_name, O_RDWR | O_DIRECT, 0777);
+        fd = open(file_name, O_RDWR | O_DIRECT | O_CREAT, 0777);
     }
 
     Timer timer;
