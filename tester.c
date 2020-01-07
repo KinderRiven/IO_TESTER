@@ -1,5 +1,6 @@
 #include "timer.h"
 #include <fcntl.h>
+#include <libaio.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,6 +76,23 @@ void io_mmap(int fd, size_t block_size, size_t total_size)
 // async (libaio)
 void io_libaio(int fd, size_t block_size, size_t total_size)
 {
+    void* buff;
+    posix_memalign(&buff, block_size, block_size);
+    size_t count = total_size / block_size;
+
+    int num_events;
+    struct io_event events[10];
+    io_context_t ioctx;
+    io_setup(100, &ioctx);
+
+    for (int i = 0; i < count; i++) {
+        struct iocb iocb;
+        struct iocb* iocbs = &iocb;
+        io_prep_pwrite(&iocb, fd, buff, block_size, block_size * i);
+        io_submit(ioctx_, 1, &iocbs);
+        num_events = io_getevents(ioctx_, 1, 10, events, NULL);
+        printf("%d\n", num_events);
+    }
 }
 
 void* run_benchmark(void* options)
