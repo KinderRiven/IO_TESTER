@@ -102,17 +102,13 @@ void* run_benchmark(void* options)
     sprintf(file_name, "%d.io", opt->thread_id);
 
     if (opt->type == IO_READ_WRITE) {
-        fd = open(file_name, O_RDWR | O_CREAT, 0777);
-        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
+        fd = open(file_name, O_RDWR, 0777);
     } else if (opt->type == IO_DIRECT_ACCESS) {
-        fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
-        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
+        fd = open(file_name, O_RDWR | O_DIRECT, 0777);
     } else if (opt->type == IO_MMAP) {
-        fd = open(file_name, O_RDWR | O_CREAT, 0777);
-        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
+        fd = open(file_name, O_RDWR, 0777);
     } else if (opt->type == IO_LIBAIO) {
-        fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
-        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, opt->total_size);
+        fd = open(file_name, O_RDWR | O_DIRECT, 0777);
     }
 
     Timer timer;
@@ -139,6 +135,7 @@ void* run_benchmark(void* options)
     double iops = 1000000000.0 / latency;
     printf("[%d][TIME:%.2f][IOPS:%.2f]\n", opt->thread_id, seconds, iops);
     opt->iops = iops;
+    close(fd);
     return NULL;
 }
 
@@ -150,12 +147,22 @@ int main(int argc, char** argv)
     int num_thread = atol(argv[2]);
     size_t block_size = atol(argv[3]); // B
     size_t total_size = atol(argv[4]); // MB
+    total_size *= (1024 * 1024);
+
+    for (int i = 0; i < num_thread; i++) { // create file
+        int fd;
+        char file_name[32];
+        sprintf(file_name, "%d.io", i);
+        fd = open(file_name, O_RDWR | O_CREAT, 0777);
+        fallocate(fd, FALLOC_FL_PUNCH_HOLE, 0, total_size);
+        close(fd);
+    }
 
     for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
         options[i].thread_id = i;
         options[i].block_size = block_size;
-        options[i].total_size = total_size * (1024 * 1024);
+        options[i].total_size = total_size;
         pthread_create(thread_id + i, NULL, run_benchmark, (void*)&options[i]);
     }
 
