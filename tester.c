@@ -8,13 +8,10 @@
 #include <unistd.h>
 
 struct thread_options {
-public:
     int type;
     int thread_id;
     size_t block_size;
     size_t total_size;
-
-public:
     double iops;
 };
 
