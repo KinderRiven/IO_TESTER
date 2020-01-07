@@ -89,7 +89,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
         struct iocb iocb;
         struct iocb* iocbs = &iocb;
         io_prep_pwrite(&iocb, fd, buff, block_size, block_size * i);
-        io_submit(ioctx_, 1, &iocbs);
+        io_submit(ioctx, 1, &iocbs);
         num_events = io_getevents(ioctx, 1, 10, events, NULL);
         printf("%d\n", num_events);
     }
