@@ -21,11 +21,8 @@ struct thread_options {
 #define IO_LIBAIO (4)
 
 // read/write
-void io_read_write(int thread_id, size_t block_size, size_t total_size)
+void io_read_write(int fd, size_t block_size, size_t total_size)
 {
-    char file_name[32];
-    sprintf(file_name, "%d.io", thread_id);
-    int fd = open(file_name, O_RDWR | O_CREAT, 0777);
     size_t count = total_size / block_size;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
@@ -37,15 +34,11 @@ void io_read_write(int thread_id, size_t block_size, size_t total_size)
     }
 
     free(buff);
-    close(fd);
 }
 
 // direct_io
-void io_direct_access(int thread_id, size_t block_size, size_t total_size)
+void io_direct_access(int fd, size_t block_size, size_t total_size)
 {
-    char file_name[32];
-    sprintf(file_name, "%d.io", thread_id);
-    int fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
     size_t count = total_size / block_size;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
@@ -56,15 +49,11 @@ void io_direct_access(int thread_id, size_t block_size, size_t total_size)
     }
 
     free(buff);
-    close(fd);
 }
 
 // mmap
-void io_mmap(int thread_id, size_t block_size, size_t total_size)
+void io_mmap(int fd, size_t block_size, size_t total_size)
 {
-    char file_name[32];
-    sprintf(file_name, "%d.io", thread_id);
-    int fd = open(file_name, O_RDWR | O_CREAT, 0777);
     void* dest = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
     size_t count = total_size / block_size;
     void* buff;
@@ -84,28 +73,44 @@ void io_mmap(int thread_id, size_t block_size, size_t total_size)
 }
 
 // async (libaio)
-void io_libaio(int thread_id, size_t block_size, size_t total_size)
+void io_libaio(int fd, size_t block_size, size_t total_size)
 {
 }
 
 void* run_benchmark(void* options)
 {
     struct thread_options* opt = (struct thread_options*)options;
+    int fd;
+    char file_name[32];
+    sprintf(file_name, "%d.io", opt->thread_id);
+
+    if (opt->type == IO_READ_WRITE) {
+        fd = open(file_name, O_RDWR | O_CREAT, 0777);
+        fallocate(fd, 0, 0, opt->total_size);
+    } else if (opt->type == IO_DIRECT_ACCESS) {
+        fd = open(file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
+        fallocate(fd, 0, 0, opt->total_size);
+    } else if (opt->type == IO_MMAP) {
+        fd = open(file_name, O_RDWR | O_CREAT, 0777);
+        fallocate(fd, 0, 0, opt->total_size);
+    } else if (opt->type == IO_LIBAIO) {
+    }
+
     Timer timer;
     timer.Start();
 
     switch (opt->type) {
     case IO_READ_WRITE:
-        io_read_write(opt->thread_id, opt->block_size, opt->total_size);
+        io_read_write(fd, opt->block_size, opt->total_size);
         break;
     case IO_DIRECT_ACCESS:
-        io_direct_access(opt->thread_id, opt->block_size, opt->total_size);
+        io_direct_access(fd, opt->block_size, opt->total_size);
         break;
     case IO_MMAP:
-        io_mmap(opt->thread_id, opt->block_size, opt->total_size);
+        io_mmap(fd, opt->block_size, opt->total_size);
         break;
     case IO_LIBAIO:
-        io_libaio(opt->thread_id, opt->block_size, opt->total_size);
+        io_libaio(fd, opt->block_size, opt->total_size);
         break;
     }
 
