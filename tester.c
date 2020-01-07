@@ -139,6 +139,8 @@ void* run_benchmark(void* options)
     return NULL;
 }
 
+#define USE_FALLOCATE
+
 int main(int argc, char** argv)
 {
     pthread_t thread_id[32];
@@ -149,7 +151,8 @@ int main(int argc, char** argv)
     size_t total_size = atol(argv[4]); // MB
     total_size *= (1024 * 1024);
 
-    for (int i = 0; i < num_thread; i++) { // create file
+#ifdef USE_FALLOCATE
+    for (int i = 0; i < num_thread; i++) {
         int fd;
         char file_name[32];
         sprintf(file_name, "%d.io", i);
@@ -157,6 +160,7 @@ int main(int argc, char** argv)
         fallocate(fd, 0, 0, total_size);
         close(fd);
     }
+#endif
 
     for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
