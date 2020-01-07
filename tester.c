@@ -154,11 +154,9 @@ int main(int argc, char** argv)
         char file_name[32];
         sprintf(file_name, "%d.io", i);
         fd = open(file_name, O_RDWR | O_CREAT, 0777);
-        fallocate(fd, FALLOC_FL_ZERO_RANGE, 0, total_size);
+        fallocate(fd, 0, 0, total_size);
         close(fd);
     }
-
-    while(1);
 
     for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
