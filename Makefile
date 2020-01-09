@@ -1,5 +1,5 @@
 all:
-	g++ -O0 tester.c -o tester -lpthread -lnuma -laio
+	g++ -O0 tester.c -o tester -lpthread -lnuma -laio -lnuma
 
 aio:
 	g++ -O0 aio_tester.cc -o aio_tester -lpthread
