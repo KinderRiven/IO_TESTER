@@ -1,13 +1,12 @@
 #include "timer.h"
 #include <fcntl.h>
+#include <libaio.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
-#include <linux/aio_abi.h>
-#include <signal.h>
 
 struct thread_options {
     int type;
@@ -34,7 +33,6 @@ void io_read_write(int fd, size_t block_size, size_t total_size)
         write(fd, buff, block_size);
         fsync(fd);
     }
-
     free(buff);
 }
 
@@ -49,7 +47,6 @@ void io_direct_access(int fd, size_t block_size, size_t total_size)
     for (int i = 0; i < count; i++) {
         write(fd, buff, block_size);
     }
-
     free(buff);
 }
 
@@ -71,44 +68,35 @@ void io_mmap(int fd, size_t block_size, size_t total_size)
 
     free(buff);
     munmap(dest, total_size);
-    close(fd);
 }
 
 // async (libaio)
 void io_libaio(int fd, size_t block_size, size_t total_size)
 {
     int ret;
-    void* ab;
-    size_t write_count = 0;
-    size_t queue_size = 8;
-    posix_memalign(&ab, block_size, block_size * queue_size);
+    void* vbuff;
+    size_t queue_size = 16;
+    size_t current_count = 0;
+    posix_memalign(&vbuff, block_size, block_size * queue_size);
+
+    char* buff = (char*)vbuff;
     size_t count = total_size / (block_size * queue_size);
-    char* buff = (char*)ab;
 
-    aio_context_t ctx;
-    memset(&ctx, 0, sizeof(ctx));
-    struct iocb cb[1024];
-    struct iocb* cbs[1024];
-    struct io_event events[1024];
+    io_context_t ioctx;
+    struct iocb iocb[128];
+    struct io_event events[128];
 
-    ret = io_setup(1024, &ctx);
-    if (ret < 0) {
-        perror("io_setup");
-        exit(-1);
-    }
+    io_setup(128, &ioctx);
 
     for (int i = 0; i < count; i++) {
         for (int j = 0; j < queue_size; j++) {
-            cb[j].aio_fildes = fd;
-            cb[j].aio_lio_opcode = IOCB_CMD_PWRITE;
-            cb[j].aio_buf = (uint64_t)&buff[block_size * j];
-            cb[j].aio_offset = write_count * block_size;
-            cb[j].aio_nbytes = block_size;
-            cbs[j] = &cb[j];
+            io_prep_pwrite(&iocb[j], fd, &buff[j * block_size], block_size, block_size * current_count);
+            current_count++;
         }
-        ret = io_submit(ctx, queue_size, cbs);
-        ret = io_getevents(ctx, ret, ret, events, NULL);
+        ret = io_submit(ioctx, queue_size, &iocb);
+        ret = io_getevents(ioctx, ret, ret, events, NULL);
     }
+    free(vbuff);
 }
 
 void* run_benchmark(void* options)
