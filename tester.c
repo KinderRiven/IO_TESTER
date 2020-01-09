@@ -76,21 +76,36 @@ void io_mmap(int fd, size_t block_size, size_t total_size)
 // async (libaio)
 void io_libaio(int fd, size_t block_size, size_t total_size)
 {
-    void* buff;
-    posix_memalign(&buff, block_size, block_size);
-    size_t count = total_size / block_size;
+    int ret;
+    char* buff;
+    size_t queue_size = 8;
+    posix_memalign(&(void* buff), block_size, block_size * queue_size);
+    size_t count = total_size / (block_size * queue_size);
+    size_t write_count = 0;
 
-    int num_events;
-    struct io_event events[10];
-    io_context_t ioctx;
-    io_setup(100, &ioctx);
+    aio_context_t ctx;
+    memset(&ctx, 0, sizeof(ctx));
+    struct iocb cb[1024];
+    struct iocb* cbs[1024];
+    struct io_event events[1024];
+
+    ret = io_setup(1024, &ctx);
+    if (ret < 0) {
+        perror("io_setup");
+        exit(-1);
+    }
 
     for (int i = 0; i < count; i++) {
-        struct iocb iocb;
-        struct iocb* iocbs = &iocb;
-        io_prep_pwrite(&iocb, fd, buff, block_size, block_size * i);
-        io_submit(ioctx, 1, &iocbs);
-        num_events = io_getevents(ioctx, 1, 10, events, NULL);
+        for (int j = 0; j < queue_size; j++) {
+            cb[j].aio_fildes = fd;
+            cb[j].aio_lio_opcode = IOCB_CMD_PWRITE;
+            cb[j].aio_buf = (uint64_t)&buff[block_size * j];
+            cb[j].aio_offset = write_count * block_size;
+            cb[j].aio_nbytes = block_size;
+            cbs[j] = &cb[j];
+        }
+        ret = io_submit(ctx, queue_size, cbs);
+        ret = io_getevents(ctx, ret, ret, events, NULL);
     }
 }
 
