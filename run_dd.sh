@@ -11,7 +11,7 @@ for ((j=1; j<=10; j++))
 do
 echo "running $i_$j..."
 perf record ./tester $i 1 $BLOCK_SIZE $TOTAL_SIZE
-mv perf.data $RESULT_PATH/$i_$j
+# mv perf.data $RESULT_PATH/$i_$j
 sync && echo 3 > /proc/sys/vm/drop_caches
 done
 done
