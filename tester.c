@@ -93,7 +93,8 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
             io_prep_pwrite(&iocb[j], fd, &buff[j * block_size], block_size, block_size * current_count);
             current_count++;
         }
-        ret = io_submit(ioctx, queue_size, &iocb);
+        struct iocb **iocbs = &iocb;
+        ret = io_submit(ioctx, queue_size, &iocbs);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
     }
     free(vbuff);
