@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <assert.h>
 #include <unistd.h>
 
 struct thread_options {
@@ -96,6 +97,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
         }
         struct iocb* iocbs = &iocb[0];
         ret = io_submit(ioctx, queue_size, &iocbs);
+        assert(ret == queue_size);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
     }
     free(vbuff);
