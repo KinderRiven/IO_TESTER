@@ -7,6 +7,8 @@
 #include <string.h>
 #include <sys/mman.h>
 #include <unistd.h>
+#include <linux/aio_abi.h>
+#include <signal.h>
 
 struct thread_options {
     int type;
@@ -77,11 +79,12 @@ void io_mmap(int fd, size_t block_size, size_t total_size)
 void io_libaio(int fd, size_t block_size, size_t total_size)
 {
     int ret;
-    char* buff;
-    size_t queue_size = 8;
-    posix_memalign(&(void* buff), block_size, block_size * queue_size);
-    size_t count = total_size / (block_size * queue_size);
+    void* ab;
     size_t write_count = 0;
+    size_t queue_size = 8;
+    posix_memalign(&ab, block_size, block_size * queue_size);
+    size_t count = total_size / (block_size * queue_size);
+    char* buff = (char*)ab;
 
     aio_context_t ctx;
     memset(&ctx, 0, sizeof(ctx));
