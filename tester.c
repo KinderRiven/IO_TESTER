@@ -87,15 +87,16 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     io_context_t ioctx;
     struct iocb iocb[128];
     struct io_event events[128];
+    struct iocbs *iocbs[128];
 
     io_setup(128, &ioctx);
 
     for (int i = 0; i < count; i++) {
         for (int j = 0; j < queue_size; j++) {
             io_prep_pwrite(&iocb[j], fd, &buff[j * block_size], block_size, block_size * current_count);
+            iocbs[j] = &iocb[j];
             current_count++;
         }
-        struct iocb* iocbs = &iocb[0];
         ret = io_submit(ioctx, queue_size, &iocbs);
         printf("%d\n", ret);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
