@@ -87,7 +87,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     io_context_t ioctx;
     struct iocb iocb[128];
     struct io_event events[128];
-    struct iocbs *iocbs[128];
+    struct iocb *iocbs[128];
 
     io_setup(128, &ioctx);
 
