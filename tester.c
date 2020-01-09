@@ -80,6 +80,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     posix_memalign(&vbuff, block_size, block_size * queue_size);
 
     char* buff = (char*)vbuff;
+    memset(buff, 0xff, block_size * queue_size);
     size_t count = total_size / (block_size * queue_size);
 
     io_context_t ioctx;
@@ -93,7 +94,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
             io_prep_pwrite(&iocb[j], fd, &buff[j * block_size], block_size, block_size * current_count);
             current_count++;
         }
-        struct iocb *iocbs = &iocb[0];
+        struct iocb* iocbs = &iocb[0];
         ret = io_submit(ioctx, queue_size, &iocbs);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
     }
