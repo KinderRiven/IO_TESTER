@@ -1,6 +1,6 @@
 RESULT_PATH=dd_result
 BLOCK_SIZE=$((1*4096))
-TOTAL_SIZE=$((8*1024))
+TOTAL_SIZE=$((4*1024))
 
 mkdir $RESULT_PATH
 for ((i=1; i<=3; i++))
