@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <assert.h>
 #include <fcntl.h>
 #include <libaio.h>
 #include <pthread.h>
@@ -6,7 +7,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
-#include <assert.h>
 #include <unistd.h>
 
 struct thread_options {
@@ -76,7 +76,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
 {
     int ret;
     void* vbuff;
-    size_t queue_size = 16;
+    size_t queue_size = 4;
     size_t current_count = 0;
     posix_memalign(&vbuff, block_size, block_size * queue_size);
 
@@ -87,8 +87,9 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     io_context_t ioctx;
     struct iocb iocb[128];
     struct io_event events[128];
-    struct iocb *iocbs[128];
+    struct iocb* iocbs[128];
 
+    memset(&ioctx, 0, sizeof(ioctx));
     io_setup(128, &ioctx);
 
     for (int i = 0; i < count; i++) {
@@ -98,7 +99,9 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
             current_count++;
         }
         ret = io_submit(ioctx, queue_size, iocbs);
+        printf("io_submit:%d\n", ret);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
+        printf("io_getevents:%d\n", ret);
     }
     free(vbuff);
 }
