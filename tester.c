@@ -76,7 +76,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
 {
     int ret;
     void* vbuff;
-    size_t queue_size = 4;
+    size_t queue_size = 8;
     size_t current_count = 0;
     posix_memalign(&vbuff, block_size, block_size * queue_size);
 
@@ -99,9 +99,9 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
             current_count++;
         }
         ret = io_submit(ioctx, queue_size, iocbs);
-        printf("io_submit:%d\n", ret);
+        // printf("io_submit:%d\n", ret);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
-        printf("io_getevents:%d\n", ret);
+        // printf("io_getevents:%d\n", ret);
     }
     free(vbuff);
 }
