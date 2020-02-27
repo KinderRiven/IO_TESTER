@@ -92,6 +92,7 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     memset(&ioctx, 0, sizeof(ioctx));
     io_setup(128, &ioctx);
 
+    printf("ready to running!\n");
     for (int i = 0; i < count; i++) {
         for (int j = 0; j < queue_size; j++) {
             io_prep_pwrite(&iocb[j], fd, &buff[j * block_size], block_size, block_size * current_count);
