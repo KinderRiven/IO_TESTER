@@ -99,9 +99,9 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
             current_count++;
         }
         ret = io_submit(ioctx, queue_size, iocbs);
-        // printf("io_submit:%d\n", ret);
+        printf("io_submit:%d\n", ret);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
-        // printf("io_getevents:%d\n", ret);
+        printf("io_getevents:%d\n", ret);
     }
     free(vbuff);
 }
