@@ -9,6 +9,7 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <stdint.h>
 
 struct thread_options {
     int type;
