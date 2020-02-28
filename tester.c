@@ -1,12 +1,13 @@
 #include "timer.h"
 #include <assert.h>
 #include <fcntl.h>
-#include <libaio.h>
+#include <linux/aio_abi.h>
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/syscall.h>
 #include <unistd.h>
 
 struct thread_options {
@@ -72,6 +73,27 @@ void io_mmap(int fd, size_t block_size, size_t total_size)
 }
 
 // async (libaio)
+static int io_destroy(aio_context_t ctx)
+{
+    return syscall(__NR_io_destroy, ctx);
+}
+
+static int io_setup(unsigned nr, aio_context_t* ctxp)
+{
+    return syscall(__NR_io_setup, nr, ctxp);
+}
+
+static int io_submit(aio_context_t ctx, long nr, struct iocb** iocbpp)
+{
+    return syscall(__NR_io_submit, ctx, nr, iocbpp);
+}
+
+static int io_getevents(aio_context_t ctx, long min_nr, long max_nr,
+    struct io_event* events, struct timespec* timeout)
+{
+    return syscall(__NR_io_getevents, ctx, min_nr, max_nr, events, timeout);
+}
+
 void io_libaio(int fd, size_t block_size, size_t total_size)
 {
     int ret;
@@ -79,31 +101,34 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     size_t queue_size = 8;
     size_t current_count = 0;
     posix_memalign(&vbuff, block_size, block_size * queue_size);
-
     char* buff = (char*)vbuff;
     memset(buff, 0xff, block_size * queue_size);
     size_t count = total_size / (block_size * queue_size);
-
-    io_context_t ioctx;
+    aio_context_t ioctx;
     struct iocb iocb[128];
     struct io_event events[128];
     struct iocb* iocbs[128];
 
-    memset(&ioctx, 0, sizeof(ioctx));
+    ioctx = 0;
     io_setup(128, &ioctx);
 
-    printf("ready to running!\n");
     for (int i = 0; i < count; i++) {
         for (int j = 0; j < queue_size; j++) {
-            io_prep_pwrite(&iocb[j], fd, &buff[j * block_size], block_size, block_size * current_count);
+            iocb[j].aio_fildes = fd;
+            iocb[j].aio_nbytes = block_size;
+            iocb[j].aio_offset = block_size * current_count;
+            iocb[j].aio_lio_opcode = IOCB_CMD_PWRITE;
+            iocb[j].aio_buf = (uint64_t)&buff[j * block_size];
             iocbs[j] = &iocb[j];
             current_count++;
         }
         ret = io_submit(ioctx, queue_size, iocbs);
-        printf("io_submit:%d\n", ret);
+        assert(ret == queue_size);
         ret = io_getevents(ioctx, ret, ret, events, NULL);
-        printf("io_getevents:%d\n", ret);
+        assert(ret == queue_size);
     }
+
+    io_destroy(ioctx);
     free(vbuff);
 }
 
