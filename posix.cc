@@ -27,12 +27,15 @@ struct thread_options {
 
 void do_randwrite(int fd, size_t block_size, size_t total_size)
 {
+    uint64_t pos = 0;
     size_t count = total_size / block_size;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
     memset(buff, 0xff, block_size);
     for (int i = 0; i < count; i++) {
-        write(fd, buff, block_size);
+        pwrite(fd, buff, block_size, pos);
+        pos += block_size;
+        // write(fd, buff, block_size);
     }
     free(buff);
 }
@@ -40,21 +43,31 @@ void do_randwrite(int fd, size_t block_size, size_t total_size)
 void do_seqwrite(int fd, size_t block_size, size_t total_size)
 {
     size_t count = total_size / block_size;
+    size_t skip = (16 * 1024 + block_size);
+    uint64_t pos = 0;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
     memset(buff, 0xff, block_size);
     for (int i = 0; i < count; i++) {
+        pwrite(fd, buff, block_size, pos);
+        pos += skip;
+        if (pos > total_size) {
+            pos = 0;
+        }
     }
     free(buff);
 }
 
 void do_randread(int fd, size_t block_size, size_t total_size)
 {
+    uint64_t pos = 0;
     size_t count = total_size / block_size;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
     memset(buff, 0xff, block_size);
     for (int i = 0; i < count; i++) {
+        pread(fd, buff, block_size, pos);
+        pos += block_size;
     }
     free(buff);
 }
@@ -62,10 +75,17 @@ void do_randread(int fd, size_t block_size, size_t total_size)
 void do_seqread(int fd, size_t block_size, size_t total_size)
 {
     size_t count = total_size / block_size;
+    size_t skip = (16 * 1024 + block_size);
+    uint64_t pos = 0;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
     memset(buff, 0xff, block_size);
     for (int i = 0; i < count; i++) {
+        pread(fd, buff, block_size, pos);
+        pos += skip;
+        if (pos > total_size) {
+            pos = 0;
+        }
     }
     free(buff);
 }
