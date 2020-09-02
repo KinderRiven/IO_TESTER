@@ -165,7 +165,7 @@ void* run_benchmark(void* options)
         printf("threadpool, set thread affinity failed.\n");
     }
 
-    fd = open(file_name, O_RDWR | O_DIRECT | O_CREAT, 0777);
+    fd = open(file_name, O_RDWR | O_DIRECT, 0777);
 
     Timer timer;
     timer.Start();
