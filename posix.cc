@@ -18,7 +18,6 @@
 
 struct thread_options {
     int type;
-    int random;
     int thread_id;
     size_t block_size;
     size_t total_size;
@@ -226,7 +225,6 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
-        options[i].random = random;
         strcpy(options[i].path, argv[2]);
         options[i].thread_id = i;
         options[i].block_size = block_size;
