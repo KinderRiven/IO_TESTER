@@ -3,58 +3,77 @@
 #include <fcntl.h>
 #include <linux/aio_abi.h>
 #include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-#include <stdint.h>
+
+#define DO_RW (1)
+#define DO_SW (2)
+#define DO_RR (3)
+#define DO_SR (4)
 
 struct thread_options {
     int type;
+    int random;
     int thread_id;
     size_t block_size;
     size_t total_size;
     double iops;
+    char path[128];
 };
 
-#define IO_READ_WRITE (1)
-#define IO_DIRECT_ACCESS (2)
-#define IO_MMAP (3)
-#define IO_LIBAIO (4)
-
-// read/write
-void io_read_write(int fd, size_t block_size, size_t total_size)
+void do_randwrite(int fd, size_t block_size, size_t total_size)
 {
     size_t count = total_size / block_size;
     void* buff;
     posix_memalign(&buff, block_size, block_size);
     memset(buff, 0xff, block_size);
-
-    for (int i = 0; i < count; i++) {
-        write(fd, buff, block_size);
-        fsync(fd);
-    }
-    free(buff);
-}
-
-// direct_io
-void io_direct_access(int fd, size_t block_size, size_t total_size)
-{
-    size_t count = total_size / block_size;
-    void* buff;
-    posix_memalign(&buff, block_size, block_size);
-    memset(buff, 0xff, block_size);
-
     for (int i = 0; i < count; i++) {
         write(fd, buff, block_size);
     }
     free(buff);
 }
 
+void do_seqwrite(int fd, size_t block_size, size_t total_size)
+{
+    size_t count = total_size / block_size;
+    void* buff;
+    posix_memalign(&buff, block_size, block_size);
+    memset(buff, 0xff, block_size);
+    for (int i = 0; i < count; i++) {
+    }
+    free(buff);
+}
+
+void do_randread(int fd, size_t block_size, size_t total_size)
+{
+    size_t count = total_size / block_size;
+    void* buff;
+    posix_memalign(&buff, block_size, block_size);
+    memset(buff, 0xff, block_size);
+    for (int i = 0; i < count; i++) {
+    }
+    free(buff);
+}
+
+void do_seqread(int fd, size_t block_size, size_t total_size)
+{
+    size_t count = total_size / block_size;
+    void* buff;
+    posix_memalign(&buff, block_size, block_size);
+    memset(buff, 0xff, block_size);
+    for (int i = 0; i < count; i++) {
+    }
+    free(buff);
+}
+
+/*
 // mmap
-void io_mmap(int fd, size_t block_size, size_t total_size)
+void do_mmap_io(int fd, size_t block_size, size_t total_size)
 {
     void* dest = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
     size_t count = total_size / block_size;
@@ -68,7 +87,6 @@ void io_mmap(int fd, size_t block_size, size_t total_size)
         msync(ptr, block_size, MS_SYNC);
         ptr += block_size;
     }
-
     free(buff);
     munmap(dest, total_size);
 }
@@ -132,13 +150,14 @@ void io_libaio(int fd, size_t block_size, size_t total_size)
     io_destroy(ioctx);
     free(vbuff);
 }
+*/
 
 void* run_benchmark(void* options)
 {
     struct thread_options* opt = (struct thread_options*)options;
     int fd;
     char file_name[32];
-    sprintf(file_name, "%d.io", opt->thread_id);
+    sprintf(file_name, "%s/%d.io", opt->path, opt->thread_id);
 
     cpu_set_t mask;
     CPU_ZERO(&mask);
@@ -147,57 +166,55 @@ void* run_benchmark(void* options)
         printf("threadpool, set thread affinity failed.\n");
     }
 
-    if (opt->type == IO_READ_WRITE) {
-        fd = open(file_name, O_RDWR | O_CREAT, 0777);
-    } else if (opt->type == IO_DIRECT_ACCESS) {
-        fd = open(file_name, O_RDWR | O_DIRECT | O_CREAT, 0777);
-    } else if (opt->type == IO_MMAP) {
-        fd = open(file_name, O_RDWR | O_CREAT, 0777);
-    } else if (opt->type == IO_LIBAIO) {
-        fd = open(file_name, O_RDWR | O_DIRECT | O_CREAT, 0777);
-    }
+    fd = open(file_name, O_RDWR | O_DIRECT | O_CREAT, 0777);
 
     Timer timer;
     timer.Start();
-
     switch (opt->type) {
-    case IO_READ_WRITE:
-        io_read_write(fd, opt->block_size, opt->total_size);
+    case DO_RW:
+        do_randwrite(fd, opt->block_size, opt->total_size);
         break;
-    case IO_DIRECT_ACCESS:
-        io_direct_access(fd, opt->block_size, opt->total_size);
+    case DO_SW:
+        do_seqwrite(fd, opt->block_size, opt->total_size);
         break;
-    case IO_MMAP:
-        io_mmap(fd, opt->block_size, opt->total_size);
+    case DO_RR:
+        do_randread(fd, opt->block_size, opt->total_size);
         break;
-    case IO_LIBAIO:
-        io_libaio(fd, opt->block_size, opt->total_size);
+    case DO_SR:
+        do_seqread(fd, opt->block_size, opt->total_size);
+        break;
+    default:
+        printf("error test type!\n");
         break;
     }
-
     timer.Stop();
+
     double seconds = timer.GetSeconds();
     double latency = 1000000000.0 * seconds / (opt->total_size / opt->block_size);
     double iops = 1000000000.0 / latency;
     printf("[%d][TIME:%.2f][IOPS:%.2f]\n", opt->thread_id, seconds, iops);
     opt->iops = iops;
     close(fd);
-    return NULL;
+    return nullptr;
 }
 
 // #define USE_FALLOCATE
-
 int main(int argc, char** argv)
 {
+    if (argc < 5) {
+        printf("./test [rw] [io_path] [num_thread] [block_size(B)] [total_size(MB)]\n");
+        exit(1);
+    }
+
     pthread_t thread_id[32];
     struct thread_options options[32];
     int type = atol(argv[1]);
-    int num_thread = atol(argv[2]);
-    size_t block_size = atol(argv[3]); // B
-    size_t total_size = atol(argv[4]); // MB
+    // argv[2] is test path
+    int num_thread = atol(argv[3]);
+    size_t block_size = atol(argv[4]); // B
+    size_t total_size = atol(argv[5]); // MB
     total_size *= (1024 * 1024);
 
-#ifdef USE_FALLOCATE
     for (int i = 0; i < num_thread; i++) {
         int fd;
         char file_name[32];
@@ -206,18 +223,20 @@ int main(int argc, char** argv)
         fallocate(fd, 0, 0, total_size);
         close(fd);
     }
-#endif
 
     for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
+        options[i].random = random;
+        strcpy(options[i].path, argv[2]);
         options[i].thread_id = i;
         options[i].block_size = block_size;
         options[i].total_size = total_size;
-        pthread_create(thread_id + i, NULL, run_benchmark, (void*)&options[i]);
+        printf("[%02d] pthread create new thread.\n", i);
+        pthread_create(thread_id + i, nullptr, run_benchmark, (void*)&options[i]);
     }
 
     for (int i = 0; i < num_thread; i++) {
-        pthread_join(thread_id[i], NULL);
+        pthread_join(thread_id[i], nullptr);
     }
 
     double sum_iops = 0;
