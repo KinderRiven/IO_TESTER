@@ -1,0 +1,3 @@
+smartctl --all [dev path]
+INTEL SSDPED1K375GA -> P4800
+INTEL SSDPEDMD400G4 -> P3700
