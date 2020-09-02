@@ -4,12 +4,12 @@ thread
 direct=1
 ioengine=libaio 
 
-log_avg_msec=5000
-write_bw_log=mlog
-write_iops_log=mlog
-write_lat_log=mlog
+# log_avg_msec=5000
+# write_bw_log=mlog
+# write_iops_log=mlog
+# write_lat_log=mlog
 
-runtime=3600
+runtime=30
 time_based
 
 [write_job]
