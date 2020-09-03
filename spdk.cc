@@ -1,0 +1,184 @@
+#include "timer.h"
+#include <assert.h>
+#include <fcntl.h>
+#include <pthread.h>
+#include <stdint.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/mman.h>
+#include <sys/syscall.h>
+#include <unistd.h>
+
+#include "spdk/env.h"
+#include "spdk/nvme.h"
+#include "spdk/stdinc.h"
+#include "spdk/vmd.h"
+
+#define DO_RW (1)
+#define DO_SW (2)
+#define DO_RR (3)
+#define DO_SR (4)
+
+struct thread_options {
+    int type;
+    int thread_id;
+    size_t block_size;
+    size_t total_size;
+    double iops;
+    char path[128];
+};
+
+struct spdk_device_t {
+    struct spdk_nvme_ctrlr* ctrlr; // control
+    struct spdk_nvme_ns* ns; // each device only has one namespace
+    size_t capacity;
+    uint64_t base;
+    size_t size; // device size
+};
+
+spdk_device_t using_device;
+
+static bool fun1(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
+{
+    printf("function1 (%s)!\n", trid->traddr);
+}
+
+static void fun2(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr* ctrlr, const struct spdk_nvme_ctrlr_opts* opts)
+{
+    spdk_device_t* device = (spdk_device_t*)cb_ctx;
+    device->ctrlr = ctrlr;
+    //  const struct spdk_nvme_ctrlr_data* cdata = spdk_nvme_ctrlr_get_data(ctrlr);
+    // printf("[%d-%d][%s-%s-%s]\n", cdata->vid, cdata->ssvid, cdata->sn, cdata->mn, cdata->fr);
+    uint32_t num_ns = spdk_nvme_ctrlr_get_num_ns(ctrlr);
+    printf("num namespace:%d\n", num_ns);
+    assert(num_ns == 1);
+    device->ns = spdk_nvme_ctrlr_get_ns(ctrlr, 1);
+    device->capacity = spdk_nvme_ns_get_size(ns);
+}
+
+void init_spdk_device()
+{
+    printf("init_spdk_device()\n");
+    struct spdk_env_opts opts;
+
+    spdk_env_opts_init(&opts);
+    printf("spdk_env_opts_init()\n");
+
+    res = spdk_env_init(&opts);
+    printf("spdk_env_init() = %d\n", res);
+
+    res = spdk_vmd_init();
+    printf("spdk_vmd_init() = %d\n", res);
+
+    res = spdk_nvme_probe(nullptr, (void*)using_device, fun1, fun2, nullptr);
+    printf("new decice %zuGB\n", using_device->size / (1024 * 1024 * 1024));
+}
+
+void do_seqwrite(int fd, size_t block_size, size_t total_size)
+{
+}
+
+void do_randwrite(int fd, size_t block_size, size_t total_size)
+{
+}
+
+void do_seqread(int fd, size_t block_size, size_t total_size)
+{
+}
+
+void do_randread(int fd, size_t block_size, size_t total_size)
+{
+}
+
+void* run_benchmark(void* options)
+{
+    struct thread_options* opt = (struct thread_options*)options;
+    int fd;
+    char file_name[32];
+    sprintf(file_name, "%s/%d.io", opt->path, opt->thread_id);
+
+    cpu_set_t mask;
+    CPU_ZERO(&mask);
+    CPU_SET(opt->thread_id, &mask);
+    if (pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask) < 0) {
+        printf("threadpool, set thread affinity failed.\n");
+    }
+    fd = open(file_name, O_RDWR | O_DIRECT, 0777);
+
+    Timer timer;
+    timer.Start();
+    switch (opt->type) {
+    case DO_RW:
+        do_randwrite(fd, opt->block_size, opt->total_size);
+        break;
+    case DO_SW:
+        do_seqwrite(fd, opt->block_size, opt->total_size);
+        break;
+    case DO_RR:
+        do_randread(fd, opt->block_size, opt->total_size);
+        break;
+    case DO_SR:
+        do_seqread(fd, opt->block_size, opt->total_size);
+        break;
+    default:
+        printf("error test type!\n");
+        break;
+    }
+    timer.Stop();
+    double seconds = timer.GetSeconds();
+    double latency = 1000000000.0 * seconds / (opt->total_size / opt->block_size);
+    double iops = 1000000000.0 / latency;
+    printf("[%d][TIME:%.2f][IOPS:%.2f]\n", opt->thread_id, seconds, iops);
+    opt->iops = iops;
+    close(fd);
+    return nullptr;
+}
+
+// #define USE_FALLOCATE
+int main(int argc, char** argv)
+{
+    if (argc < 7) {
+        printf("./spdk [rw] [io_path] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
+        exit(1);
+    }
+
+    pthread_t thread_id[32];
+    struct thread_options options[32];
+    int type = atol(argv[1]);
+    int num_thread = atol(argv[3]);
+    io_depth = atol(argv[4]);
+    size_t block_size = atol(argv[5]); // B
+    size_t total_size = atol(argv[6]); // MB
+    total_size *= (1024 * 1024);
+
+    init_spdk_device();
+
+    for (int i = 0; i < num_thread; i++) {
+        int fd;
+        char file_name[32];
+        sprintf(file_name, "%s/%d.io", argv[2], i);
+        fd = open(file_name, O_RDWR | O_CREAT, 0777);
+        fallocate(fd, 0, 0, total_size);
+        close(fd);
+    }
+    for (int i = 0; i < num_thread; i++) {
+        options[i].type = type;
+        strcpy(options[i].path, argv[2]);
+        options[i].thread_id = i;
+        options[i].block_size = block_size;
+        options[i].total_size = total_size;
+        printf("[%02d] pthread create new thread.\n", i);
+        pthread_create(thread_id + i, nullptr, run_benchmark, (void*)&options[i]);
+    }
+
+    for (int i = 0; i < num_thread; i++) {
+        pthread_join(thread_id[i], nullptr);
+    }
+    double sum_iops = 0;
+    for (int i = 0; i < num_thread; i++) {
+        sum_iops += options[i].iops;
+    }
+    printf("[SUM][[TYPE:%d]IO_DEPTH:%d][IOPS:%.2f][BW:%.2fMB/s]\n", type, sum_iops, io_depth, sum_iops * block_size / (1024 * 1024));
+    return 0;
+}
