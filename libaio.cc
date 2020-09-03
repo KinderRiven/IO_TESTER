@@ -25,6 +25,8 @@ struct thread_options {
     char path[128];
 };
 
+static int io_depth = 8;
+
 /*
 // mmap
 void do_mmap_io(int fd, size_t block_size, size_t total_size)
@@ -72,7 +74,7 @@ void do_seqwrite(int fd, size_t block_size, size_t total_size)
 {
     int ret;
     void* vbuff;
-    size_t queue_size = 8;
+    size_t queue_size = io_depth;
     size_t current_count = 0;
     posix_memalign(&vbuff, block_size, block_size * queue_size);
     char* buff = (char*)vbuff;
@@ -163,8 +165,8 @@ void* run_benchmark(void* options)
 // #define USE_FALLOCATE
 int main(int argc, char** argv)
 {
-    if (argc < 5) {
-        printf("./test [rw] [io_path] [num_thread] [block_size(B)] [total_size(MB)]\n");
+    if (argc < 6) {
+        printf("./libaio [rw] [io_path] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
         exit(1);
     }
 
@@ -173,8 +175,9 @@ int main(int argc, char** argv)
     int type = atol(argv[1]);
     // argv[2] is test path
     int num_thread = atol(argv[3]);
-    size_t block_size = atol(argv[4]); // B
-    size_t total_size = atol(argv[5]); // MB
+    io_depth = atol(argv[4]);
+    size_t block_size = atol(argv[5]); // B
+    size_t total_size = atol(argv[6]); // MB
     total_size *= (1024 * 1024);
 
     for (int i = 0; i < num_thread; i++) {
@@ -202,6 +205,6 @@ int main(int argc, char** argv)
     for (int i = 0; i < num_thread; i++) {
         sum_iops += options[i].iops;
     }
-    printf("[SUM][TYPE:%d][IOPS:%.2f][BW:%.2fMB/s]\n", type, sum_iops, sum_iops * block_size / (1024 * 1024));
+    printf("[SUM][[TYPE:%d]IO_DEPTH:%d][IOPS:%.2f][BW:%.2fMB/s]\n", type, sum_iops, io_depth, sum_iops * block_size / (1024 * 1024));
     return 0;
 }
