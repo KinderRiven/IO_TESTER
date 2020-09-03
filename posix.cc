@@ -218,7 +218,7 @@ void* run_benchmark(void* options)
 // #define USE_FALLOCATE
 int main(int argc, char** argv)
 {
-    if (argc < 5) {
+    if (argc < 6) {
         printf("./test [rw] [io_path] [num_thread] [block_size(B)] [total_size(MB)]\n");
         exit(1);
     }

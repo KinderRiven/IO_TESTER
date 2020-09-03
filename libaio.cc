@@ -27,27 +27,6 @@ struct thread_options {
 
 static int io_depth = 8;
 
-/*
-// mmap
-void do_mmap_io(int fd, size_t block_size, size_t total_size)
-{
-    void* dest = mmap(NULL, total_size, PROT_READ | PROT_WRITE, MAP_SHARED | MAP_POPULATE, fd, 0);
-    size_t count = total_size / block_size;
-    void* buff;
-    posix_memalign(&buff, block_size, block_size);
-    memset(buff, 0xff, block_size);
-    char* ptr = (char*)dest;
-
-    for (int i = 0; i < count; i++) {
-        memcpy(ptr, buff, block_size);
-        msync(ptr, block_size, MS_SYNC);
-        ptr += block_size;
-    }
-    free(buff);
-    munmap(dest, total_size);
-}
-*/
-
 // async (libaio)
 static int io_destroy(aio_context_t ctx)
 {
@@ -165,7 +144,7 @@ void* run_benchmark(void* options)
 // #define USE_FALLOCATE
 int main(int argc, char** argv)
 {
-    if (argc < 6) {
+    if (argc < 7) {
         printf("./libaio [rw] [io_path] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
         exit(1);
     }
