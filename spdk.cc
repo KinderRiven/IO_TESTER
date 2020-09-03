@@ -88,7 +88,7 @@ void callback(void* arg, const struct spdk_nvme_cpl* completion)
 
 void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
-    struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(ctrlr, NULL, 0);
+    struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(device->ctrlr, NULL, 0);
     assert(qpair != nullptr);
 
     char* buff = (char*)spdk_nvme_ctrlr_alloc_cmb_io_buffer(device->ctrlr, block_size); // 4KB
