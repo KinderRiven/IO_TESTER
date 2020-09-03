@@ -184,7 +184,6 @@ void* run_benchmark(void* options)
     if (pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask) < 0) {
         printf("threadpool, set thread affinity failed.\n");
     }
-
     fd = open(file_name, O_RDWR | O_DIRECT, 0777);
 
     Timer timer;
@@ -207,7 +206,6 @@ void* run_benchmark(void* options)
         break;
     }
     timer.Stop();
-
     double seconds = timer.GetSeconds();
     double latency = 1000000000.0 * seconds / (opt->total_size / opt->block_size);
     double iops = 1000000000.0 / latency;
