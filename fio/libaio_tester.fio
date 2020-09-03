@@ -2,7 +2,7 @@
 name=file
 thread
 direct=1
-io_depth=8
+iodepth=8
 ioengine=libaio 
 
 # log_avg_msec=5000
