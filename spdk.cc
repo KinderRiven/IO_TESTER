@@ -75,7 +75,7 @@ void init_spdk_device()
     printf("spdk_vmd_init() = %d\n", res);
 
     res = spdk_nvme_probe(nullptr, (void*)&using_device, fun1, fun2, nullptr);
-    printf("new decice %zuGB\n", using_device->size / (1024 * 1024 * 1024));
+    printf("new decice %zuGB\n", using_device.capacity / (1024 * 1024 * 1024));
 }
 
 void do_seqwrite(int fd, size_t block_size, size_t total_size)
