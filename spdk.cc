@@ -26,7 +26,6 @@ struct thread_options {
     size_t block_size;
     size_t total_size;
     double iops;
-    char path[128];
 };
 
 struct spdk_device_t {
@@ -78,28 +77,25 @@ void init_spdk_device()
     printf("new decice %zuGB\n", using_device.capacity / (1024 * 1024 * 1024));
 }
 
-void do_seqwrite(int fd, size_t block_size, size_t total_size)
+void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
 }
 
-void do_randwrite(int fd, size_t block_size, size_t total_size)
+void do_randwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
 }
 
-void do_seqread(int fd, size_t block_size, size_t total_size)
+void do_seqread(spdk_device_t* device, size_t block_size, size_t total_size)
 {
 }
 
-void do_randread(int fd, size_t block_size, size_t total_size)
+void do_randread(spdk_device_t* device, size_t block_size, size_t total_size)
 {
 }
 
 void* run_benchmark(void* options)
 {
     struct thread_options* opt = (struct thread_options*)options;
-    int fd;
-    char file_name[32];
-    sprintf(file_name, "%s/%d.io", opt->path, opt->thread_id);
 
     cpu_set_t mask;
     CPU_ZERO(&mask);
@@ -107,22 +103,21 @@ void* run_benchmark(void* options)
     if (pthread_setaffinity_np(pthread_self(), sizeof(mask), &mask) < 0) {
         printf("threadpool, set thread affinity failed.\n");
     }
-    fd = open(file_name, O_RDWR | O_DIRECT, 0777);
 
     Timer timer;
     timer.Start();
     switch (opt->type) {
     case DO_RW:
-        do_randwrite(fd, opt->block_size, opt->total_size);
+        do_randwrite(using_device, opt->block_size, opt->total_size);
         break;
     case DO_SW:
-        do_seqwrite(fd, opt->block_size, opt->total_size);
+        do_seqwrite(using_device, opt->block_size, opt->total_size);
         break;
     case DO_RR:
-        do_randread(fd, opt->block_size, opt->total_size);
+        do_randread(using_device, opt->block_size, opt->total_size);
         break;
     case DO_SR:
-        do_seqread(fd, opt->block_size, opt->total_size);
+        do_seqread(using_device, opt->block_size, opt->total_size);
         break;
     default:
         printf("error test type!\n");
@@ -134,40 +129,30 @@ void* run_benchmark(void* options)
     double iops = 1000000000.0 / latency;
     printf("[%d][TIME:%.2f][IOPS:%.2f]\n", opt->thread_id, seconds, iops);
     opt->iops = iops;
-    close(fd);
     return nullptr;
 }
 
 // #define USE_FALLOCATE
 int main(int argc, char** argv)
 {
-    if (argc < 7) {
-        printf("./spdk [rw] [io_path] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
+    if (argc < 6) {
+        printf("./spdk [rw] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
         exit(1);
     }
 
     pthread_t thread_id[32];
     struct thread_options options[32];
     int type = atol(argv[1]);
-    int num_thread = atol(argv[3]);
-    io_depth = atol(argv[4]);
-    size_t block_size = atol(argv[5]); // B
-    size_t total_size = atol(argv[6]); // MB
+    int num_thread = atol(argv[2]);
+    io_depth = atol(argv[3]);
+    size_t block_size = atol(argv[4]); // B
+    size_t total_size = atol(argv[5]); // MB
     total_size *= (1024 * 1024);
 
     init_spdk_device();
 
     for (int i = 0; i < num_thread; i++) {
-        int fd;
-        char file_name[32];
-        sprintf(file_name, "%s/%d.io", argv[2], i);
-        fd = open(file_name, O_RDWR | O_CREAT, 0777);
-        fallocate(fd, 0, 0, total_size);
-        close(fd);
-    }
-    for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
-        strcpy(options[i].path, argv[2]);
         options[i].thread_id = i;
         options[i].block_size = block_size;
         options[i].total_size = total_size;
