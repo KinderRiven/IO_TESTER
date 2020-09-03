@@ -39,6 +39,8 @@ struct spdk_device_t {
 
 spdk_device_t using_device;
 
+int io_depth = 8;
+
 static bool fun1(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
 {
     printf("function1 (%s)!\n", trid->traddr);
@@ -71,7 +73,7 @@ void init_spdk_device()
     res = spdk_vmd_init();
     printf("spdk_vmd_init() = %d\n", res);
 
-    res = spdk_nvme_probe(nullptr, (void*)using_device, fun1, fun2, nullptr);
+    res = spdk_nvme_probe(nullptr, (void*)&using_device, fun1, fun2, nullptr);
     printf("new decice %zuGB\n", using_device->size / (1024 * 1024 * 1024));
 }
 
