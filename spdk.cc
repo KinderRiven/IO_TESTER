@@ -77,8 +77,35 @@ void init_spdk_device()
     printf("new decice %zuGB\n", using_device.capacity / (1024 * 1024 * 1024));
 }
 
+void callback(void* arg, const struct spdk_nvme_cpl* completion)
+{
+    int* finished = (int*)arg;
+    if (spdk_nvme_cpl_is_error(completion)) {
+        printf("Something erro in write_callback!\n");
+    }
+    *finished = 1;
+}
+
 void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
+    struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(ctrlr, NULL, 0);
+    assert(qpair != nullptr);
+
+    char* buff = (char*)spdk_nvme_ctrlr_alloc_cmb_io_buffer(ctrlr, block_size); // 4KB
+    if (buff == nullptr) {
+        buff = (char*)spdk_zmalloc(block_size, block_size, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
+    }
+    memset(buff, 0xff, block_size);
+    assert(buff != nullptr);
+
+    for (size_t i = 0; i < count; i++) {
+        int finished = 0;
+        int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, i, 1, callback, (void*)&finished, 0);
+        while (!finished) {
+            int num = spdk_nvme_qpair_process_completions(qpair, 0);
+        }
+    }
+    spdk_nvme_ctrlr_free_io_qpair(qpair);
 }
 
 void do_randwrite(spdk_device_t* device, size_t block_size, size_t total_size)
