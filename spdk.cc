@@ -91,7 +91,7 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
     struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(ctrlr, NULL, 0);
     assert(qpair != nullptr);
 
-    char* buff = (char*)spdk_nvme_ctrlr_alloc_cmb_io_buffer(ctrlr, block_size); // 4KB
+    char* buff = (char*)spdk_nvme_ctrlr_alloc_cmb_io_buffer(device->ctrlr, block_size); // 4KB
     if (buff == nullptr) {
         buff = (char*)spdk_zmalloc(block_size, block_size, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
     }
