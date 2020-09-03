@@ -98,6 +98,7 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
     memset(buff, 0xff, block_size);
     assert(buff != nullptr);
 
+    size_t count = total_size / block_size;
     for (size_t i = 0; i < count; i++) {
         int finished = 0;
         int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, i, 1, callback, (void*)&finished, 0);
