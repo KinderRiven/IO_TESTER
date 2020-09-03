@@ -1,0 +1,20 @@
+[global]
+name=file
+thread
+direct=1
+iodepth=8
+ioengine=io_uring
+
+# log_avg_msec=5000
+# write_bw_log=mlog
+# write_iops_log=mlog
+# write_lat_log=mlog
+
+runtime=60
+time_based
+
+[write_job]
+size=10G
+numjobs=1
+bs=4K
+rw=write
