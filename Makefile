@@ -11,7 +11,7 @@ SPDK_LINK_FLAGS= -Wl,--whole-archive  -Llib/dpdk -lspdk_env_dpdk  -lspdk_env_dpd
     -lspdk_ftl \
     -lspdk_log -lspdk_trace -lspdk_util -lspdk_copy -lspdk_conf \
     -lspdk_vmd \
-    -Wl,--no-whole-archive -lpthread -lrt -lnuma -ldl -luuid -lm -lisal
+	-Wl,--no-whole-archive -lpthread -lrt -lnuma -ldl -luuid -lm -lisal
 
 all:
 	g++ -O0 posix.cc -o posix -lpthread -lnuma
