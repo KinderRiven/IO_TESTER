@@ -108,16 +108,16 @@ void* run_benchmark(void* options)
     timer.Start();
     switch (opt->type) {
     case DO_RW:
-        do_randwrite(using_device, opt->block_size, opt->total_size);
+        do_randwrite(&using_device, opt->block_size, opt->total_size);
         break;
     case DO_SW:
-        do_seqwrite(using_device, opt->block_size, opt->total_size);
+        do_seqwrite(&using_device, opt->block_size, opt->total_size);
         break;
     case DO_RR:
-        do_randread(using_device, opt->block_size, opt->total_size);
+        do_randread(&using_device, opt->block_size, opt->total_size);
         break;
     case DO_SR:
-        do_seqread(using_device, opt->block_size, opt->total_size);
+        do_seqread(&using_device, opt->block_size, opt->total_size);
         break;
     default:
         printf("error test type!\n");
