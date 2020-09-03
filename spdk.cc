@@ -56,11 +56,12 @@ static void fun2(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct
     printf("num namespace:%d\n", num_ns);
     assert(num_ns == 1);
     device->ns = spdk_nvme_ctrlr_get_ns(ctrlr, 1);
-    device->capacity = spdk_nvme_ns_get_size(ns);
+    device->capacity = spdk_nvme_ns_get_size(device->ns);
 }
 
 void init_spdk_device()
 {
+    int res;
     printf("init_spdk_device()\n");
     struct spdk_env_opts opts;
 
