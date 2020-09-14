@@ -219,7 +219,8 @@ void* run_benchmark(void* options)
 int main(int argc, char** argv)
 {
     if (argc < 6) {
-        printf("./test [rw] [io_path] [num_thread] [block_size(B)] [total_size(MB)]\n");
+        printf("./posix [rw] [io_path] [num_thread] [block_size(B)] [total_size(MB)]\n");
+        printf("for example: ./posix 2 /home/hanshukai/p3700_dir1 4 4096 2048\n");
         exit(1);
     }
 
