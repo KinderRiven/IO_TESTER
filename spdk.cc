@@ -79,7 +79,7 @@ void init_spdk_device()
     res = spdk_vmd_init();
     printf("  4.spdk_vmd_init = %d\n", res);
 
-    res = spdk_nvme_probe(nullptr, (void*)&using_device, probe_cb, attach_cb, remove_cb);
+    res = spdk_nvme_probe(nullptr, (void*)&using_device, probe_cb, attach_cb, nullptr);
     printf("  5.new decice %zuGB\n", using_device.capacity / (1024 * 1024 * 1024));
 }
 
