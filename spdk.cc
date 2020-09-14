@@ -109,12 +109,17 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 
     for (uint64_t i = 0; i < count; i++) {
         int finished[32] = { 0 };
+        int c = 0;
         for (int j = 0; j < io_depth; j++) {
             int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, 1, write_cb, (void*)&finished[j], 0);
             k++;
         }
-        int num = spdk_nvme_qpair_process_completions(qpair, io_depth);
-        printf("io_finished:%d\n", num);
+        while (true) {
+            int num = spdk_nvme_qpair_process_completions(qpair, io_depth);
+            if (num > 0) {
+                printf("io_finished:%d\n", num);
+            }
+        }
     }
     spdk_nvme_ctrlr_free_io_qpair(qpair);
 }
