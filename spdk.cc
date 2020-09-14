@@ -38,7 +38,7 @@ struct spdk_device_t {
 
 spdk_device_t using_device;
 
-int io_depth = 8;
+int io_depth = 32;
 
 static bool probe_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
 {
@@ -111,7 +111,7 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
         int finished[32] = { 0 };
         int c = 0;
         for (int j = 0; j < io_depth; j++) {
-            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, 1, write_cb, (void*)&finished[j], 0);
+            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, 1, nullptr, nullptr, 0);
             k++;
         }
         while (true) {
