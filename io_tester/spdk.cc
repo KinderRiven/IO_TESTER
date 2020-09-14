@@ -181,6 +181,7 @@ int main(int argc, char** argv)
 {
     if (argc < 6) {
         printf("./spdk [rw] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
+        printf("for example: ./spdk 2 1 8 4096 2048\n");
         exit(1);
     }
 
