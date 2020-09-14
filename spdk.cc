@@ -113,7 +113,7 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
             int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, 1, write_cb, (void*)&finished[j], 0);
             k++;
         }
-        int num = spdk_nvme_qpair_process_completions(qpair, 0);
+        int num = spdk_nvme_qpair_process_completions(qpair, io_depth);
         printf("io_finished:%d\n", num);
     }
     spdk_nvme_ctrlr_free_io_qpair(qpair);
