@@ -146,6 +146,7 @@ int main(int argc, char** argv)
 {
     if (argc < 7) {
         printf("./libaio [rw] [io_path] [num_thread] [io_depth] [block_size(B)] [total_size(MB)]\n");
+        printf("for example: ./libaio 2 /home/hanshukai/p3700_dir1 1 1 4096 2048\n");
         exit(1);
     }
 
