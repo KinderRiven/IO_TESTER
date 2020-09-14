@@ -40,6 +40,7 @@ public:
 
 private:
     struct timespec start, end, now;
+
     size_t elapsed;
 };
 
