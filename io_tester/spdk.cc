@@ -112,6 +112,7 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
         int c = 0;
         for (int j = 0; j < io_depth; j++) {
             int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, 1, nullptr, nullptr, 0);
+            assert(rc == 0);
             k++;
         }
         while (true) {
