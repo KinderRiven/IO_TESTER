@@ -116,8 +116,9 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
         }
         while (true) {
             int num = spdk_nvme_qpair_process_completions(qpair, io_depth);
-            if (num > 0) {
-                printf("io_finished:%d\n", num);
+            c += num;
+            if (c > io_depth) {
+                break;
             }
         }
     }
