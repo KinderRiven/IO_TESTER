@@ -40,16 +40,16 @@ spdk_device_t using_device;
 
 int io_depth = 8;
 
-static bool fun1(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
+static bool probe_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
 {
     printf("function1 (%s)!\n", trid->traddr);
 }
 
-static void fun2(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr* ctrlr, const struct spdk_nvme_ctrlr_opts* opts)
+static void attach_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr* ctrlr, const struct spdk_nvme_ctrlr_opts* opts)
 {
     spdk_device_t* device = (spdk_device_t*)cb_ctx;
     device->ctrlr = ctrlr;
-    //  const struct spdk_nvme_ctrlr_data* cdata = spdk_nvme_ctrlr_get_data(ctrlr);
+    // const struct spdk_nvme_ctrlr_data* cdata = spdk_nvme_ctrlr_get_data(ctrlr);
     // printf("[%d-%d][%s-%s-%s]\n", cdata->vid, cdata->ssvid, cdata->sn, cdata->mn, cdata->fr);
     uint32_t num_ns = spdk_nvme_ctrlr_get_num_ns(ctrlr);
     printf("num namespace:%d\n", num_ns);
@@ -58,26 +58,32 @@ static void fun2(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct
     device->capacity = spdk_nvme_ns_get_size(device->ns);
 }
 
+static void remove_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr* ctrlr, const struct spdk_nvme_ctrlr_opts* opts)
+{
+}
+
 void init_spdk_device()
 {
+    printf(">>init_spdk_device\n");
+
     int res;
-    printf("init_spdk_device()\n");
+    printf("  1.init_spdk_device\n");
     struct spdk_env_opts opts;
 
     spdk_env_opts_init(&opts);
-    printf("spdk_env_opts_init()\n");
+    printf("  2.spdk_env_opts_init\n");
 
     res = spdk_env_init(&opts);
-    printf("spdk_env_init() = %d\n", res);
+    printf("  3.spdk_env_init = %d\n", res);
 
     res = spdk_vmd_init();
-    printf("spdk_vmd_init() = %d\n", res);
+    printf("  4.spdk_vmd_init = %d\n", res);
 
-    res = spdk_nvme_probe(nullptr, (void*)&using_device, fun1, fun2, nullptr);
-    printf("new decice %zuGB\n", using_device.capacity / (1024 * 1024 * 1024));
+    res = spdk_nvme_probe(nullptr, (void*)&using_device, probe_cb, attach_cb, remove_cb);
+    printf("  5.new decice %zuGB\n", using_device.capacity / (1024 * 1024 * 1024));
 }
 
-void callback(void* arg, const struct spdk_nvme_cpl* completion)
+void write_cb(void* arg, const struct spdk_nvme_cpl* completion)
 {
     int* finished = (int*)arg;
     if (spdk_nvme_cpl_is_error(completion)) {
@@ -88,9 +94,11 @@ void callback(void* arg, const struct spdk_nvme_cpl* completion)
 
 void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
+    size_t count = total_size / block_size;
     struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(device->ctrlr, NULL, 0);
     assert(qpair != nullptr);
 
+    // new write buffer
     char* buff = (char*)spdk_nvme_ctrlr_alloc_cmb_io_buffer(device->ctrlr, block_size); // 4KB
     if (buff == nullptr) {
         buff = (char*)spdk_zmalloc(block_size, block_size, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
@@ -98,12 +106,12 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
     memset(buff, 0xff, block_size);
     assert(buff != nullptr);
 
-    size_t count = total_size / block_size;
     for (size_t i = 0; i < count; i++) {
         int finished = 0;
-        int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, i, 1, callback, (void*)&finished, 0);
+        int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, i, 1, write_cb, (void*)&finished, 0);
         while (!finished) {
             int num = spdk_nvme_qpair_process_completions(qpair, 0);
+            printf("io_finished:%d\n", num);
         }
     }
     spdk_nvme_ctrlr_free_io_qpair(qpair);

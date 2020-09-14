@@ -167,6 +167,7 @@ int main(int argc, char** argv)
         fallocate(fd, 0, 0, total_size);
         close(fd);
     }
+
     for (int i = 0; i < num_thread; i++) {
         options[i].type = type;
         strcpy(options[i].path, argv[2]);
@@ -180,6 +181,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < num_thread; i++) {
         pthread_join(thread_id[i], nullptr);
     }
+
     double sum_iops = 0;
     for (int i = 0; i < num_thread; i++) {
         sum_iops += options[i].iops;
