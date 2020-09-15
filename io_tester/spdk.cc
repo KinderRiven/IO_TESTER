@@ -94,7 +94,10 @@ void write_cb(void* arg, const struct spdk_nvme_cpl* completion)
 
 void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
+    assert(block_size % 4096 == 0);
+
     uint64_t k = 0;
+    uint64_t n_lba = block_size / 4096;
     uint64_t count = (total_size / block_size) / io_depth;
     struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(device->ctrlr, NULL, 0);
     assert(qpair != nullptr);
@@ -111,9 +114,9 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
         int finished[32] = { 0 };
         int c = 0;
         for (int j = 0; j < io_depth; j++) {
-            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, 1, nullptr, nullptr, 0);
+            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, n_lba, nullptr, nullptr, 0);
             assert(rc == 0);
-            k++;
+            k += n_lba;
         }
         while (true) {
             int num = spdk_nvme_qpair_process_completions(qpair, io_depth);
