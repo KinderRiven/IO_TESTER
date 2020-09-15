@@ -111,6 +111,7 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
     assert(buff != nullptr);
 
     for (uint64_t i = 0; i < count; i++) {
+        printf("%llu/%llu\n", i, count);
         int c = 0;
         for (int j = 0; j < io_depth; j++) {
             int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, n_lba, nullptr, nullptr, 0);
