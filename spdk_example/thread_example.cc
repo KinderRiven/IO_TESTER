@@ -20,9 +20,10 @@ void start_thread(void* cb)
     printf("start_thread (0x%llx)\n", (uint64_t)cb);
 }
 
-void bdev_parse_arg(int ch, char* arg)
+int bdev_parse_arg(int ch, char* arg)
 {
     printf("bdev_parse_arg (%d) (%s)\n", ch, arg);
+    return 0;
 }
 
 void bdev_usage()
