@@ -65,7 +65,6 @@ static void remove_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, s
 void init_spdk_device()
 {
     printf(">>init_spdk_device\n");
-
     int res;
     printf("  1.init_spdk_device\n");
     struct spdk_env_opts opts;
