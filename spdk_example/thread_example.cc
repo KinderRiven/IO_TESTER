@@ -63,7 +63,7 @@ int main(int argc, char** argv)
     app_msg.bdev_name = g_bdev_name;
     printf("OPT [name:%s][file_name:%s]\n", opts.name, opts.config_file);
     printf("APP [name:%s]\n", app_msg.bdev_name);
-    rc = spdk_app_start(&opts, start_app, nullptr);
+    rc = spdk_app_start(&opts, start_app, (void *)&app_msg);
 
     spdk_app_stop(rc);
     return 0;
