@@ -27,7 +27,8 @@ void start_app(void* cb)
 {
     int rc;
     uint32_t blk_size;
-    uint32_t buf_alignl struct app_msg_t* msg = (struct app_msg_t*)cb;
+    uint32_t buf_alignl;
+    struct app_msg_t* msg = (struct app_msg_t*)cb;
     struct spdk_bdev* bdev;
     struct spdk_bdev_desc* desc;
 
