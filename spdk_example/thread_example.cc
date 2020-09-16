@@ -49,7 +49,7 @@ void start_app(void* cb)
     rc = spdk_bdev_open(bdev, true, nullptr, nullptr, &desc);
     if (rc) {
         printf("bad bdev open!\n");
-        exit(0)
+        exit(0);
     }
 
     channel = spdk_bdev_get_io_channel(desc);
