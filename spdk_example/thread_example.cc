@@ -44,6 +44,8 @@ int main(int argc, char** argv)
     //     exit(rc);
     // }
 
-    spdk_app_start(&opts, start_thread, nullptr);
+    rc = spdk_app_start(&opts, start_thread, nullptr);
+
+    spdk_app_stop(rc);
     return 0;
 }
