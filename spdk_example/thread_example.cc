@@ -29,7 +29,6 @@ void start_app(void* cb)
     struct spdk_bdev* bdev;
 
     printf(">>>>[start_thread(0x%llx)]\n", (uint64_t)cb);
-
     bdev = spdk_bdev_get_by_name(msg->bdev_name);
     printf("    [bdev:%s|%llx]\n", msg->bdev_name, (uint64_t)bdev);
 }
@@ -64,7 +63,6 @@ int main(int argc, char** argv)
     printf("OPT [name:%s][file_name:%s]\n", opts.name, opts.config_file);
     printf("APP [name:%s]\n", app_msg.bdev_name);
     rc = spdk_app_start(&opts, start_app, (void *)&app_msg);
-
     spdk_app_stop(rc);
     return 0;
 }
