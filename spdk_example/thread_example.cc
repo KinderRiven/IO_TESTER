@@ -17,18 +17,17 @@
 
 void start_thread(void* cb)
 {
-    printf("START!\n");
+    printf("start_thread (0x%llx)\n", (uint64_t)cb);
 }
 
-int f_parese(int f, char* arg)
+void bdev_parse_arg(int ch, char* arg)
 {
-    printf("parese!\n");
-    return 0;
+    printf("bdev_parse_arg (%d)\n", ch);
 }
 
-void f_usage()
+void bdev_usage()
 {
-    printf("usage!\n");
+    printf("bdev_usage\n");
 }
 
 int main(int argc, char** argv)
@@ -36,16 +35,16 @@ int main(int argc, char** argv)
     int rc;
     struct spdk_app_opts opts = {};
     opts.name = "bdev-example";
+    hello_context.bdev_name = "sixsixsix";
 
     spdk_app_opts_init(&opts);
 
-    // if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:", NULL, f_parese, f_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
-    //     printf("ERRROR!\n");
-    //     exit(rc);
-    // }
+    if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
+        printf("spdk_app_parse_arg error!\n");
+        exit(rc);
+    }
 
     rc = spdk_app_start(&opts, start_thread, nullptr);
-
     spdk_app_stop(rc);
     return 0;
 }
