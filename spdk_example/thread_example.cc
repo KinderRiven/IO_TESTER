@@ -23,6 +23,11 @@ public:
     char* bdev_name;
 };
 
+void write_cb(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
+{
+    printf("[write_callback:%d]\n", success);
+}
+
 void start_app(void* cb)
 {
     int rc;
@@ -31,25 +36,35 @@ void start_app(void* cb)
     struct app_msg_t* msg = (struct app_msg_t*)cb;
     struct spdk_bdev* bdev;
     struct spdk_bdev_desc* desc;
+    struct spdk_io_channel* channel;
 
     printf(">>>>[start_thread(0x%llx)]\n", (uint64_t)cb);
     bdev = spdk_bdev_get_by_name(msg->bdev_name);
     printf("    [bdev:%s|%llx]\n", msg->bdev_name, (uint64_t)bdev);
-
     if (bdev == nullptr) {
         printf("bad bdev!\n");
         exit(0);
     }
 
     rc = spdk_bdev_open(bdev, true, nullptr, nullptr, &desc);
-
     if (rc) {
         printf("bad bdev open!\n");
+        exit(0)
+    }
+
+    channel = spdk_bdev_get_io_channel(desc);
+    if (channel == nullptr) {
+        printf("bad channel!\n");
+        exit(0);
     }
 
     blk_size = spdk_bdev_get_block_size(bdev);
     buf_align = spdk_bdev_get_buf_align(bdev);
-    printf("[blk_size:%d][buf_align:%d]\n", blk_size, buf_align);
+    void* buff = spdk_dma_zmalloc(blk_size, buf_align, nullptr);
+    printf("[blk_size:%d][buf_align:%d][buff:%llx]\n", blk_size, buf_align, (uint64_t)buff);
+
+    rc = spdk_bdev_write(desc, channel, buff, 0, blk_size, write_cb, nullptr);
+    printf("%d\n", rc);
 }
 
 int bdev_parse_arg(int ch, char* arg)
