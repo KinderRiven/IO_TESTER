@@ -9,6 +9,7 @@
 #include <sys/syscall.h>
 #include <unistd.h>
 
+#include "spdk/event.h"
 #include "spdk/env.h"
 #include "spdk/nvme.h"
 #include "spdk/stdinc.h"
