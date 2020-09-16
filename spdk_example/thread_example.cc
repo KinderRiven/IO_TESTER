@@ -35,7 +35,6 @@ int main(int argc, char** argv)
     int rc;
     struct spdk_app_opts opts = {};
     opts.name = "bdev-example";
-    hello_context.bdev_name = "sixsixsix";
 
     spdk_app_opts_init(&opts);
 
