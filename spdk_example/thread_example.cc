@@ -28,7 +28,7 @@ int bdev_parse_arg(int ch, char* arg)
 
 void bdev_usage()
 {
-    printf("bdev_usage\n");
+    printf(">>>>bdev_usage\n");
 }
 
 int main(int argc, char** argv)
