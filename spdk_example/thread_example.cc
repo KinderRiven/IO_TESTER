@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
     spdk_app_opts_init(&opts);
 
-    if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
+    if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:c:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
         printf(">>>>spdk_app_parse_arg error!\n");
         exit(rc);
     }
