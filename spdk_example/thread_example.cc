@@ -44,6 +44,7 @@ int main(int argc, char** argv)
         exit(rc);
     }
 
+    printf("[name:%s][file_name:%s]\n", opts.name, opts.config_file);
     rc = spdk_app_start(&opts, start_thread, nullptr);
     spdk_app_stop(rc);
     return 0;
