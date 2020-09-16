@@ -15,7 +15,7 @@
 #include "spdk/stdinc.h"
 #include "spdk/vmd.h"
 
-void* start_thread(void* cb)
+void start_thread(void* cb)
 {
     printf("START!\n");
     while (true) {
