@@ -17,12 +17,12 @@
 
 void start_thread(void* cb)
 {
-    printf("start_thread (0x%llx)\n", (uint64_t)cb);
+    printf(">>>>start_thread (0x%llx)\n", (uint64_t)cb);
 }
 
 int bdev_parse_arg(int ch, char* arg)
 {
-    printf("bdev_parse_arg (%d) (%s)\n", ch, arg);
+    printf(">>>>bdev_parse_arg (%c) (%s)\n", ch, arg);
     return 0;
 }
 
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
     spdk_app_opts_init(&opts);
 
     if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
-        printf("spdk_app_parse_arg error!\n");
+        printf(">>>>spdk_app_parse_arg error!\n");
         exit(rc);
     }
 
