@@ -36,7 +36,7 @@ void f_usage()
 int main(int argc, char** argv)
 {
     int rc;
-    struct spd_app_opts opts = {};
+    struct spdk_app_opts  opts = {};
     opts.name = "bdev-example";
 
     spdk_app_opts_init(&opts);
