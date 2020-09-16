@@ -11,6 +11,7 @@
 
 #include "spdk/env.h"
 #include "spdk/event.h"
+#include "spdk/bdev.h"
 #include "spdk/nvme.h"
 #include "spdk/stdinc.h"
 #include "spdk/vmd.h"
