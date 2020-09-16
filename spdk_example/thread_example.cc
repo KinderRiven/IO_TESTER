@@ -18,8 +18,6 @@
 void start_thread(void* cb)
 {
     printf("START!\n");
-    while (true) {
-    }
 }
 
 int f_parese(int f, char* arg)
