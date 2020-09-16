@@ -22,7 +22,7 @@ void start_thread(void* cb)
 
 void bdev_parse_arg(int ch, char* arg)
 {
-    printf("bdev_parse_arg (%d)\n", ch);
+    printf("bdev_parse_arg (%d) (%s)\n", ch, arg);
 }
 
 void bdev_usage()
