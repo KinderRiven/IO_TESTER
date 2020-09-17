@@ -28,13 +28,16 @@ void write_cb(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     printf("[write_callback:%d]\n", success);
 }
 
+int tick(void* num)
+{
+    int p = *(int*)num;
+    printf("tick:%d\n", tick);
+}
+
 void start_app(void* cb)
 {
-    printf(">>>>[spdk_reactor_init]\n");
-    spdk_reactors_init();
-
-    printf(">>>>[spdk_reactor_start]\n");
-    spdk_reactors_start();
+    int num1 = 100;
+    spdk_poller_register(tick, (void*)&num, 500000);
 }
 
 int bdev_parse_arg(int ch, char* arg)
