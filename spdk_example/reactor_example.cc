@@ -64,7 +64,7 @@ int bdev_parse_arg(int ch, char* arg)
         printf(">>>>[bdev_name(%c)-(%s)]\n", ch, arg);
         g_bdev_name = arg;
         break;
-    case 'f':
+    case 'r':
         printf(">>>>[reactor_mask(%c)-(%s)]\n", ch, arg);
         g_bdev_name = arg;
         break;
