@@ -14,4 +14,5 @@ SPDK_LINK_FLAGS= -Wl,--whole-archive  -Llib/dpdk -lspdk_env_dpdk  -lspdk_env_dpd
 	-Wl,--no-whole-archive -lpthread -lrt -lnuma -ldl -luuid -lm -lisal
 
 all:
-	g++ -O0 thread_example.cc -o thread_example -I../include $(SPDK_LINK_FLAGS)
+	g++ -O0 bdev_example.cc -o bdev_example -I../include $(SPDK_LINK_FLAGS)
+    g++ -O0 reactor_example.cc -o reactor_example -I../include $(SPDK_LINK_FLAGS)
