@@ -62,7 +62,7 @@ void start_app(void* cb)
     buf_align = spdk_bdev_get_buf_align(bdev);
     void* buff = spdk_dma_zmalloc(blk_size, buf_align, nullptr);
     printf("[blk_size:%d][buf_align:%d][buff:%llx]\n", blk_size, buf_align, (uint64_t)buff);
-
+    
     rc = spdk_bdev_write(desc, channel, buff, 0, blk_size, write_cb, nullptr);
     printf("%d\n", rc);
 }

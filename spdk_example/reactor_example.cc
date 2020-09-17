@@ -31,13 +31,19 @@ void write_cb(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
 int tick(void* num)
 {
     int p = *(int*)num;
-    printf("tick:%d\n", tick);
+    printf("tick:%d\n", num);
 }
 
 void start_app(void* cb)
 {
+    printf("start_app!\n");
     int num1 = 100;
+    printf("register_poller!\n");
+
     spdk_poller_register(tick, (void*)&num1, 500000);
+
+    spdk_event_allocate();
+    spdk_event_call();
 }
 
 int bdev_parse_arg(int ch, char* arg)
@@ -67,7 +73,7 @@ int main(int argc, char** argv)
     }
 
     app_msg.bdev_name = g_bdev_name;
-    printf("OPT [name:%s][file_name:%s]\n", opts.name, opts.config_file);
+    printf("OPT [name:%s][file_name:%s][reactor_mask:%s]\n", opts.name, opts.config_file, opts.reactor_mask);
     printf("APP [name:%s]\n", app_msg.bdev_name);
     rc = spdk_app_start(&opts, start_app, (void*)&app_msg);
     spdk_app_stop(rc);
