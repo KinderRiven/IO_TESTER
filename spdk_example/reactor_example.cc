@@ -49,12 +49,12 @@ void start_app(void* cb)
     uint64_t *tick_1 = (uint64_t *)malloc(sizeof(uint64_t));
     *tick_1 = 500000;
     printf("poller_register (1)!\n");
-    struct spdk_poller* poller_1 = spdk_poller_register(tick_f1, (void*)tick_1, tick_1);
+    struct spdk_poller* poller_1 = spdk_poller_register(tick_f1, (void*)tick_1, *tick_1);
 
      uint64_t *tick_2= (uint64_t *)malloc(sizeof(uint64_t));
      *tick_2 = 500000;
     printf("poller_register (2)!\n");
-    struct spdk_poller* poller_2 = spdk_poller_register(tick_f2, (void*)tick_2, tick_2);
+    struct spdk_poller* poller_2 = spdk_poller_register(tick_f2, (void*)tick_2, *tick_2);
 }
 
 int bdev_parse_arg(int ch, char* arg)
