@@ -28,7 +28,13 @@ void write_cb(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
     printf("[write_callback:%d]\n", success);
 }
 
-int tick(void* num)
+int tick_1(void* num)
+{
+    uint64_t p = *((uint64_t*)num);
+    printf("[tick:%llu]\n", p);
+}
+
+int tick_2(void* num)
 {
     uint64_t p = *((uint64_t*)num);
     printf("[tick:%llu]\n", p);
@@ -37,15 +43,14 @@ int tick(void* num)
 void start_app(void* cb)
 {
     printf("start_app!\n");
-
     uint64_t tick_1 = 500000;
     uint64_t tick_2 = 5000000;
 
     printf("poller_register (1)!\n");
-    spdk_poller_register(tick, (void*)&tick_1, tick_1);
+    spdk_poller_register(tick_1, (void*)&tick_1, tick_1);
 
     printf("poller_register (2)!\n");
-    spdk_poller_register(tick, (void*)&tick_2, tick_2);
+    spdk_poller_register(tick_2, (void*)&tick_2, tick_2);
 }
 
 int bdev_parse_arg(int ch, char* arg)
