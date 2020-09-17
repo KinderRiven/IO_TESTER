@@ -43,12 +43,12 @@ int tick_2(void* num)
 void start_app(void* cb)
 {
     printf("start_app!\n");
-    uint64_t tick_1 = 500000;
-    uint64_t tick_2 = 5000000;
 
+    uint64_t tick_1 = 500000;
     printf("poller_register (1)!\n");
     spdk_poller_register(tick_1, (void*)&tick_1, tick_1);
 
+    uint64_t tick_2 = 5000000;
     printf("poller_register (2)!\n");
     spdk_poller_register(tick_2, (void*)&tick_2, tick_2);
 }
