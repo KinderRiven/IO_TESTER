@@ -30,20 +30,22 @@ void write_cb(struct spdk_bdev_io* bdev_io, bool success, void* cb_arg)
 
 int tick(void* num)
 {
-    int p = *(int*)num;
-    printf("tick:%d\n", num);
+    uint64_t p = *((uint64_t*)num);
+    printf("[tick:%llu]\n", p);
 }
 
 void start_app(void* cb)
 {
     printf("start_app!\n");
-    int num1 = 100;
-    printf("register_poller!\n");
 
-    spdk_poller_register(tick, (void*)&num1, 500000);
+    uint64_t tick_1 = 500000;
+    uint64_t tick_2 = 5000000;
 
-    spdk_event_allocate();
-    spdk_event_call();
+    printf("poller_register (1)!\n");
+    spdk_poller_register(tick, (void*)&tick_1, tick_1);
+
+    printf("poller_register (2)!\n");
+    spdk_poller_register(tick, (void*)&tick_2, tick_2);
 }
 
 int bdev_parse_arg(int ch, char* arg)
