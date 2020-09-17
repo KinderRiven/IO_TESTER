@@ -59,8 +59,18 @@ void start_app(void* cb)
 
 int bdev_parse_arg(int ch, char* arg)
 {
-    printf(">>>>[bdev_parse_arg(%c)-(%s)]\n", ch, arg);
-    g_bdev_name = arg;
+    switch (ch) {
+    case 'b':
+        printf(">>>>[bdev_name(%c)-(%s)]\n", ch, arg);
+        g_bdev_name = arg;
+        break;
+    case 'f':
+        printf(">>>>[reactor_mask(%c)-(%s)]\n", ch, arg);
+        g_bdev_name = arg;
+        break;
+    default:
+        break;
+    }
     return 0;
 }
 
@@ -78,13 +88,12 @@ int main(int argc, char** argv)
     spdk_app_opts_init(&opts);
     opts.name = "bdev-example";
 
-    if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
+    if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:r:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
         printf(">>>>[spdk_app_parse_arg error!]\n");
         exit(rc);
     }
 
     app_msg.bdev_name = g_bdev_name;
-    opts.reactor_mask = "0x5";
     printf("OPT [name:%s][file_name:%s][reactor_mask:%s][master_core:%d]\n", opts.name, opts.config_file, opts.reactor_mask, opts.master_core);
     printf("APP [name:%s]\n", app_msg.bdev_name);
     rc = spdk_app_start(&opts, start_app, (void*)&app_msg);
