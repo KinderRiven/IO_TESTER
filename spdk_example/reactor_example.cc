@@ -37,7 +37,7 @@ int tick(void* num)
 void start_app(void* cb)
 {
     int num1 = 100;
-    spdk_poller_register(tick, (void*)&num, 500000);
+    spdk_poller_register(tick, (void*)&num1, 500000);
 }
 
 int bdev_parse_arg(int ch, char* arg)
