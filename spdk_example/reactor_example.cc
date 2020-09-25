@@ -42,6 +42,13 @@ int tick_f2(void* num)
     return 1;
 }
 
+int tick_f3(void* num)
+{
+    uint64_t p = *((uint64_t*)num);
+    printf("[tick_f3:%llu]\n", p);
+    return 1;
+}
+
 void start_app(void* cb)
 {
     printf("start_app!\n");
@@ -49,12 +56,18 @@ void start_app(void* cb)
     uint64_t* tick_1 = (uint64_t*)malloc(sizeof(uint64_t));
     *tick_1 = 500000;
     printf("poller_register (1)!\n");
+    // time poller
     struct spdk_poller* poller_1 = spdk_poller_register(tick_f1, (void*)tick_1, *tick_1);
 
     uint64_t* tick_2 = (uint64_t*)malloc(sizeof(uint64_t));
     *tick_2 = 5000000;
     printf("poller_register (2)!\n");
     struct spdk_poller* poller_2 = spdk_poller_register(tick_f2, (void*)tick_2, *tick_2);
+
+    uint64_t* tick_3 = (uint64_t*)malloc(sizeof(uint64_t));
+    *tick_3 = 0;
+    printf("poller_register (3)!\n");
+    struct spdk_poller* poller_3 = spdk_poller_register(tick_f3, (void*)tick_3, *tick_3);
 }
 
 int bdev_parse_arg(int ch, char* arg)

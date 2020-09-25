@@ -62,7 +62,6 @@ void do_batch_submit()
 void* do_thread(void* v)
 {
     int id = *(int*)v;
-
     for (int i = 0; i < 100; i++) {
         size_t idx = get_buffer_idx();
         /* enqueue */
@@ -87,7 +86,6 @@ int main(int argc, char** argv)
 {
     pthread_t threads[32];
     int pid[32] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16 };
-
     for (int i = 0; i < 4; i++) {
         pthread_create(threads + i, NULL, do_thread, (void*)(pid + i));
     }
