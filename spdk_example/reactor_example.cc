@@ -76,7 +76,7 @@ void start_app(void* cb)
     struct spdk_poller* poller_3 = spdk_poller_register(tick_f3, (void*)tick_3, *tick_3);
     */
 
-    struct spdk_event* event = spdk_event_allocate(0, event1, nullptr, nullptr);
+    struct spdk_event* event = spdk_event_allocate(0, event_1, nullptr, nullptr);
     spdk_event_call(event);
 }
 
