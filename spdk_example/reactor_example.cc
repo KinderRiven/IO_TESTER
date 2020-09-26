@@ -55,7 +55,7 @@ void event_1(void* arg1, void* arg2)
     int c = *core;
     printf("This is event (%d)\n", c);
 
-    *core = (++c);
+    *core = ((++c) % 8);
     struct spdk_event* event = spdk_event_allocate(0, event_1, (void*)core, nullptr);
     spdk_event_call(event);
 }
