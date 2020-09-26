@@ -65,9 +65,10 @@ void start_app(void* cb)
     struct spdk_poller* poller_2 = spdk_poller_register(tick_f2, (void*)tick_2, *tick_2);
 
     uint64_t* tick_3 = (uint64_t*)malloc(sizeof(uint64_t));
-    *tick_3 = 0;
+    *tick_3 = 100000;
     printf("poller_register (3)!\n");
     struct spdk_poller* poller_3 = spdk_poller_register(tick_f3, (void*)tick_3, *tick_3);
+
 }
 
 int bdev_parse_arg(int ch, char* arg)
