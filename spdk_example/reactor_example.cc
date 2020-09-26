@@ -51,7 +51,13 @@ int tick_f3(void* num)
 
 void event_1(void* arg1, void* arg2)
 {
-    printf("This is event 1\n");
+    int* core = (int*)arg1;
+    int c = *core;
+    printf("This is event (%d)\n", c);
+
+    *core = (++c);
+    struct spdk_event* event = spdk_event_allocate(0, event_1, (void*)core, nullptr);
+    spdk_event_call(event);
 }
 
 void start_app(void* cb)
@@ -76,7 +82,8 @@ void start_app(void* cb)
     struct spdk_poller* poller_3 = spdk_poller_register(tick_f3, (void*)tick_3, *tick_3);
     */
 
-    struct spdk_event* event = spdk_event_allocate(0, event_1, nullptr, nullptr);
+    int* core = (int*)malloc(sizeof(int));
+    struct spdk_event* event = spdk_event_allocate(0, event_1, (void*)core, nullptr);
     spdk_event_call(event);
 }
 
