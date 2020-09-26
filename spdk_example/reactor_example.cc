@@ -68,7 +68,6 @@ void start_app(void* cb)
     *tick_3 = 100000;
     printf("poller_register (3)!\n");
     struct spdk_poller* poller_3 = spdk_poller_register(tick_f3, (void*)tick_3, *tick_3);
-
 }
 
 int bdev_parse_arg(int ch, char* arg)
@@ -107,6 +106,7 @@ int main(int argc, char** argv)
     printf("OPT [name:%s][file_name:%s][reactor_mask:%s][master_core:%d]\n", opts.name, opts.config_file, opts.reactor_mask, opts.master_core);
     printf("APP [name:%s]\n", app_msg.bdev_name);
     rc = spdk_app_start(&opts, start_app, (void*)&app_msg);
+    printf("Reactor Exit! (%d)\n", rc);
     spdk_app_stop(rc);
     return 0;
 }
