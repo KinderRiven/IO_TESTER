@@ -3,7 +3,7 @@ SPDK_LINK_FLAGS= -Wl,--whole-archive  -L../third-party/dpdk -lspdk_env_dpdk  -ls
     -lspdk_json -lspdk_jsonrpc -lspdk_log_rpc  -lspdk_app_rpc  -lspdk_rpc \
     -lspdk_bdev_rpc -lspdk_bdev_null -lspdk_bdev_malloc \
     -lspdk_bdev_nvme -lspdk_bdev_zone_block \
-    -lspdk_bdev \
+    -lspdk_bdev -lspdk_blob -lspdk_blob_bdev -lspdk_blobfs -lspdk_blobfs_bdev \
     -lspdk_event_bdev -lspdk_event_copy -lspdk_event_net -lspdk_event_vmd -lspdk_event \
     -lspdk_thread -lspdk_sock_posix -lspdk_sock -lspdk_notify \
     -lspdk_net \
