@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 {
     spdk_bs_opts_init(&bs_opts);
     spdk_app_opts_init(&app_opts);
-    if ((rc = spdk_app_parse_args(argc, argv, &opts, "", nullptr, nullptr, nullptr)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
+    if ((rc = spdk_app_parse_args(argc, argv, &app_opts, "", nullptr, nullptr, nullptr)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
         printf("spdk_app_parse_arg error!\n");
         exit(rc);
     }
