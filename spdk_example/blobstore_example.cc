@@ -32,8 +32,11 @@ static void blob_read_cb(void* arg1, int bserrno)
 {
     printf("read finished!(%d)\n", bserrno);
     char* s = (char*)arg1;
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < 1024; i++) {
         printf("[%02x]", s[i]);
+        if (i % 32 == 0) {
+            printf("\n");
+        }
     }
     printf("\n");
 }
@@ -43,9 +46,9 @@ static void blob_read()
     assert(g_blobstore != nullptr);
     assert(g_blob != nullptr);
 
-    void* read_buff = spdk_malloc(4096, 0x1000, nullptr, SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
+    void* read_buff = spdk_malloc(0x1000, 0x1000, nullptr, SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
     assert(read_buff != nullptr);
-    memset(read_buff, 0x5a, 4096);
+    memset(read_buff, 0, 4096);
 
     /* Now we have to allocate a channel. */
     assert(g_io_channel != nullptr);
@@ -65,9 +68,9 @@ static void blob_write()
     assert(g_blobstore != nullptr);
     assert(g_blob != nullptr);
 
-    void* write_buff = spdk_malloc(4096, 0x1000, nullptr, SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
+    void* write_buff = spdk_malloc(0x1000, 0x1000, nullptr, SPDK_ENV_LCORE_ID_ANY, SPDK_MALLOC_DMA);
     assert(write_buff != nullptr);
-    memset(write_buff, 0x5a, 4096);
+    memset(write_buff, 0xff, 0x1000);
 
     /* Now we have to allocate a channel. */
     g_io_channel = spdk_bs_alloc_io_channel(g_blobstore);
@@ -154,7 +157,7 @@ void test_blobstore(void* cb)
 
     while (!g_blob_init) {
     };
-    printf("[1] spdk_init_finished!\n");
+    printf("[1] spdk_init_finished! (%d)\n", g_blob_init);
     blob_write();
 }
 
