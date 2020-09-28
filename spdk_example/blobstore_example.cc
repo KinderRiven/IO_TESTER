@@ -20,7 +20,6 @@
 #include "spdk/blob_bdev.h"
 #include "spdk/blobfs.h"
 #include "spdk/blobfs_bdev.h"
-#include "spdk/blobstore.h"
 
 struct spdk_bdev* bdev;
 struct spdk_bs_opts bs_opts;
