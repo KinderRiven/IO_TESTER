@@ -23,9 +23,16 @@
 
 int main(int argc, char** argv)
 {
+    int rc;
     struct spdk_bdev* bdev;
-    struct spdk_bs_opts opts;
+    struct spdk_bs_opts bs_opts;
     struct spdk_bs_dev* bsdev;
+    struct spdk_app_opts app_opts;
+
+    spdk_app_opts_init(&app_opts);
+    rc = spdk_app_parse_args(argc, argv, &app_opts, "b:", nullptr, nullptr, nullptr);
+
+    spdk_bs_opts_init(&bs_opts);
 
     bdev = spdk_bdev_get_by_name("NVMe0");
     if (bdev == nullptr) {
@@ -33,8 +40,6 @@ int main(int argc, char** argv)
         exit(0);
     }
 
-    spdk_bs_opts_init(&opts);
-    
     bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
     if (bsdev == nullptr) {
         printf("get bsdev device failed!\n");
