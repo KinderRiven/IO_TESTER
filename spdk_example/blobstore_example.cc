@@ -42,7 +42,7 @@ void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
 void test_blobstore(void* cb)
 {
     printf("[%s][%s]\n", app_opts.config_file, nvme_device[0);
-    bdev = spdk_bdev_get_by_name(nvme_device[i]);
+    bdev = spdk_bdev_get_by_name(nvme_device[0]);
 
     if (bdev == NULL) {
         printf("get bdev device failed!\n");
