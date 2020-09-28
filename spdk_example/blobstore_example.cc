@@ -23,7 +23,6 @@
 
 const char nvme_device[] = "Nvme0n1";
 
-volatile int g_blob_init = 0;
 struct spdk_blob_store* g_blobstore;
 struct spdk_blob* g_blob;
 struct spdk_io_channel* g_io_channel;
@@ -92,7 +91,8 @@ static void blob_resize_cb(void* cb_arg, int bserrno)
     printf("[5] blob resize finished!(%d)\n", bserrno);
     uint64_t total = spdk_blob_get_num_clusters(blob);
     printf("[5] blob cluster count:%llu\n", total);
-    g_blob_init = 1;
+    printf("[5] spdk blob finished!\n");
+    blob_write();
 }
 
 // 4. Resize Blob
@@ -154,11 +154,6 @@ void test_blobstore(void* cb)
 
     spdk_bs_init(bsdev, nullptr, bs_init_cb, nullptr);
     // spdk_bs_init(bsdev, &bs_opts, bs_init_cb, nullptr);
-
-    while (!g_blob_init) {
-    };
-    printf("[1] spdk_init_finished! (%d)\n", g_blob_init);
-    blob_write();
 }
 
 int main(int argc, char** argv)
