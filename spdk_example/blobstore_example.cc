@@ -129,7 +129,6 @@ void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
 void test_blobstore(void* cb)
 {
     struct spdk_bdev* bdev;
-
     // get spdk bdev layer device
     bdev = spdk_bdev_get_by_name(nvme_device);
     if (bdev == nullptr) {
