@@ -21,12 +21,16 @@
 #include "spdk/blobfs.h"
 #include "spdk/blobfs_bdev.h"
 
-int rc;
 struct spdk_bdev* bdev;
 struct spdk_bs_opts bs_opts;
 struct spdk_bs_dev* bsdev;
 struct spdk_app_opts app_opts;
 struct spdk_blob* blos_store;
+
+void bdev_init_cb(void* cb_arg, int rc)
+{
+    printf("bdev_init_cb[%d]\n", rc);
+}
 
 void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
 {
@@ -51,12 +55,16 @@ void test_blobstore(void* cb)
 
 int main(int argc, char** argv)
 {
+    int rc;
     spdk_bs_opts_init(&bs_opts);
     spdk_app_opts_init(&app_opts);
+
     if ((rc = spdk_app_parse_args(argc, argv, &app_opts, "", nullptr, nullptr, nullptr)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
         printf("spdk_app_parse_arg error!\n");
         exit(rc);
     }
-    spdk_app_start(&app_opts, test_blobstore, nullptr);
+
+    spdk_bdev_initialize(bdev_init_cb, nullptr);
+    rc = spdk_app_start(&app_opts, test_blobstore, nullptr);
     return 0;
 }
