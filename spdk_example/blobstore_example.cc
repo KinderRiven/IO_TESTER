@@ -23,6 +23,7 @@
 
 const char nvme_device[] = "Nvme0n1";
 
+volatile int g_blob_init = 0;
 struct spdk_blob_store* g_blobstore;
 struct spdk_blob* g_blob;
 struct spdk_io_channel* g_io_channel;
@@ -30,6 +31,11 @@ struct spdk_io_channel* g_io_channel;
 static void blob_read_cb(void* arg1, int bserrno)
 {
     printf("read finished!(%d)\n", bserrno);
+    char* s = (char*)arg1;
+    for (int i = 0; i < 32; i++) {
+        printf("[%02x]", s[i]);
+    }
+    printf("\n");
 }
 
 static void blob_read()
@@ -45,7 +51,7 @@ static void blob_read()
     assert(g_io_channel != nullptr);
 
     /* Let's perform the write, 1 io_unit at offset 0. */
-    spdk_blob_io_read(g_blob, g_io_channel, read_buff, 0, 1, blob_read_cb, nullptr);
+    spdk_blob_io_read(g_blob, g_io_channel, read_buff, 0, 1, blob_read_cb, (void*)read_buff);
 }
 
 static void blob_write_cb(void* arg1, int bserrno)
@@ -83,6 +89,7 @@ static void blob_resize_cb(void* cb_arg, int bserrno)
     printf("[5] blob resize finished!(%d)\n", bserrno);
     uint64_t total = spdk_blob_get_num_clusters(blob);
     printf("[5] blob cluster count:%llu\n", total);
+    g_blob_init = 1;
 }
 
 // 4. Resize Blob
@@ -131,19 +138,25 @@ void test_blobstore(void* cb)
     } else {
         printf("[1] get bdev successful!\n");
     }
+
     // bs = [b]lock[s]tore
     // Create a blobstore block device from a bdev. (deprecated, please use spdk_bdev_create_bs_dev_from_desc,
     // together with spdk_bdev_open_ext).
-    struct spdk_bs_dev *bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
+    struct spdk_bs_dev* bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
     if (bsdev == nullptr) {
         printf("[1] get bsdev device failed!\n");
         exit(0);
     } else {
         printf("[1] get bsdev successful!\n");
     }
+
     spdk_bs_init(bsdev, nullptr, bs_init_cb, nullptr);
     // spdk_bs_init(bsdev, &bs_opts, bs_init_cb, nullptr);
+
+    while (!g_blob_init) {
+    };
     printf("[1] spdk_init_finished!\n");
+    blob_write();
 }
 
 int main(int argc, char** argv)
