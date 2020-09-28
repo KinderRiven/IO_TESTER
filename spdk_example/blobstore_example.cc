@@ -30,12 +30,12 @@ struct spdk_blob* blos_store;
 
 void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
 {
-    printf("bs_init_finished!\n");
+    printf("bs init finished!\n");
 }
 
 void test_blobstore(void* cb)
 {
-    bdev = spdk_bdev_get_by_name("NVMe0");
+    bdev = spdk_bdev_get_by_name("Nvme0");
     if (bdev == nullptr) {
         printf("get bdev device failed!\n");
         exit(0);
@@ -51,10 +51,12 @@ void test_blobstore(void* cb)
 
 int main(int argc, char** argv)
 {
-    spdk_app_opts_init(&app_opts);
-    rc = spdk_app_parse_args(argc, argv, &app_opts, "b:", nullptr, nullptr, nullptr);
-
     spdk_bs_opts_init(&bs_opts);
+    spdk_app_opts_init(&app_opts);
+    if ((rc = spdk_app_parse_args(argc, argv, &opts, "", nullptr, nullptr, nullptr)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
+        printf("spdk_app_parse_arg error!\n");
+        exit(rc);
+    }
     spdk_app_start(&app_opts, test_blobstore, nullptr);
     return 0;
 }
