@@ -43,6 +43,7 @@ void test_blobstore(void* cb)
 {
     for (int i = 0; i < 3; i++) {
         // get an spdk bdev device
+        printf("[%s][%s]\n", app_opts.config_file, nvme_device[i]);
         bdev = spdk_bdev_get_by_name(nvme_device[i]);
         if (bdev == NULL) {
             printf("get bdev device failed!\n");
