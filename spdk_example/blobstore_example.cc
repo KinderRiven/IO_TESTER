@@ -43,28 +43,30 @@ void test_blobstore(void* cb)
     if (bdev == nullptr) {
         printf("get bdev device failed!\n");
         exit(0);
+    } else {
+        printf("get bdev successful!\n");
     }
 
     bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
     if (bsdev == nullptr) {
         printf("get bsdev device failed!\n");
         exit(0);
+    } else {
+        printf("get bsdev successful!\n");
     }
-    spdk_bs_init(bsdev, &bs_opts, bs_init_cb, nullptr);
+
+    spdk_bs_init(bsdev, nullptr, bs_init_cb, nullptr);
+    // spdk_bs_init(bsdev, &bs_opts, bs_init_cb, nullptr);
 }
 
 int main(int argc, char** argv)
 {
     int rc;
-    spdk_bs_opts_init(&bs_opts);
+    //spdk_bs_opts_init(&bs_opts);
     spdk_app_opts_init(&app_opts);
-
-    if ((rc = spdk_app_parse_args(argc, argv, &app_opts, "", nullptr, nullptr, nullptr)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
-        printf("spdk_app_parse_arg error!\n");
-        exit(rc);
-    }
-
-    spdk_bdev_initialize(bdev_init_cb, nullptr);
+    app_opts.name = "blobstore_test";
+    app_opts.config_file = "bdev.conf";
     rc = spdk_app_start(&app_opts, test_blobstore, nullptr);
+    spdk_app_fini();
     return 0;
 }
