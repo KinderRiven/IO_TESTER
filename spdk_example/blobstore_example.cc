@@ -26,6 +26,12 @@ struct spdk_bdev* bdev;
 struct spdk_bs_opts bs_opts;
 struct spdk_bs_dev* bsdev;
 struct spdk_app_opts app_opts;
+struct spdk_blob* blos_store;
+
+void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
+{
+    printf("bs_init_finished!\n");
+}
 
 void test_blobstore(void* cb)
 {
@@ -40,6 +46,8 @@ void test_blobstore(void* cb)
         printf("get bsdev device failed!\n");
         exit(0);
     }
+
+    spdk_bs_init(bsdev, bs_opts, bs_init_cb, nullptr);
 }
 
 int main(int argc, char** argv)
