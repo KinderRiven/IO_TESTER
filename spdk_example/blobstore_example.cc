@@ -27,7 +27,7 @@ struct spdk_bs_dev* bsdev;
 struct spdk_app_opts app_opts;
 struct spdk_blob* blos_store;
 
-const char* nvme_device[3] = { "Nvme0n1", "Nvme1n1", "Nvme2n1" };
+const char nvme_device[] = "Nvme0n1";
 
 void bdev_init_cb(void* cb_arg, int rc)
 {
@@ -37,30 +37,36 @@ void bdev_init_cb(void* cb_arg, int rc)
 void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
 {
     printf("bs init finished!\n");
+    printf("blobstore:0x%x\n", (uint64_t)bs);
+    if (bs != nullptr) {
+        printf("md_start:%llu, md_len:%d, io_unit:%d\n", bs->md_start, bs->md_len, bs->io_unit_size);
+    }
 }
 
 void test_blobstore(void* cb)
 {
-    printf("[%s][%s]\n", app_opts.config_file, nvme_device[0]);
-    bdev = spdk_bdev_get_by_name(nvme_device[0]);
+    printf("[%s][%s]\n", app_opts.config_file, nvme_device);
 
-    if (bdev == NULL) {
+    // get spdk bdev layer device
+    bdev = spdk_bdev_get_by_name(nvme_device);
+    if (bdev == nullptr) {
         printf("get bdev device failed!\n");
         exit(0);
     } else {
         printf("get bdev successful!\n");
     }
 
-    bsdev = spdk_bdev_create_bs_dev(bdev, NULL, NULL);
-
-    if (bsdev == NULL) {
+    // get blob device from bdev layer
+    bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
+    if (bsdev == nullptr) {
         printf("get bsdev device failed!\n");
         exit(0);
     } else {
         printf("get bsdev successful!\n");
     }
-    spdk_bs_init(bsdev, NULL, bs_init_cb, NULL);
-    // spdk_bs_init(bsdev, &bs_opts, bs_init_cb, NULL);
+
+    spdk_bs_init(bsdev, nullptr, bs_init_cb, nullptr);
+    // spdk_bs_init(bsdev, &bs_opts, bs_init_cb, nullptr);
 }
 
 int main(int argc, char** argv)
@@ -70,7 +76,7 @@ int main(int argc, char** argv)
     spdk_app_opts_init(&app_opts);
     app_opts.name = "blobstore_test";
     app_opts.config_file = "bdev.conf";
-    rc = spdk_app_start(&app_opts, test_blobstore, NULL);
+    rc = spdk_app_start(&app_opts, test_blobstore, nullptr);
     spdk_app_fini();
     return 0;
 }
