@@ -48,6 +48,6 @@ int main(int argc, char** argv)
     rc = spdk_app_parse_args(argc, argv, &app_opts, "b:", nullptr, nullptr, nullptr);
 
     spdk_bs_opts_init(&bs_opts);
-    spdk_app_start(app_opts, test_blobstore, nullptr);
+    spdk_app_start(&app_opts, test_blobstore, nullptr);
     return 0;
 }
