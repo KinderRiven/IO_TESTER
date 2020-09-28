@@ -91,7 +91,7 @@ int main(int argc, char** argv)
     if ((rc = spdk_app_parse_args(argc, argv, &opts, "b:", NULL, bdev_parse_arg, bdev_usage)) != SPDK_APP_PARSE_ARGS_SUCCESS) {
         printf(">>>>[spdk_app_parse_arg error!]\n");
         exit(rc);
-    }
+    } 
 
     app_msg.bdev_name = g_bdev_name;
     printf("OPT [name:%s][file_name:%s]\n", opts.name, opts.config_file);

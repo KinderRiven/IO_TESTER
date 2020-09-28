@@ -38,8 +38,8 @@
 #ifndef SPDK_BLOB_BDEV_H
 #define SPDK_BLOB_BDEV_H
 
-#include "spdk/stdinc.h"
 #include "spdk/bdev.h"
+#include "spdk/stdinc.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,8 +59,8 @@ struct spdk_bdev_module;
  *
  * \return a pointer to the blobstore block device on success or NULL otherwise.
  */
-struct spdk_bs_dev *spdk_bdev_create_bs_dev(struct spdk_bdev *bdev, spdk_bdev_remove_cb_t remove_cb,
-		void *remove_ctx);
+struct spdk_bs_dev* spdk_bdev_create_bs_dev(struct spdk_bdev* bdev, spdk_bdev_remove_cb_t remove_cb,
+    void* remove_ctx);
 
 /**
  * Create a blobstore block device from the descriptor of a bdev.
@@ -69,7 +69,7 @@ struct spdk_bs_dev *spdk_bdev_create_bs_dev(struct spdk_bdev *bdev, spdk_bdev_re
  *
  * \return a pointer to the blobstore block device on success or NULL otherwise.
  */
-struct spdk_bs_dev *spdk_bdev_create_bs_dev_from_desc(struct spdk_bdev_desc *desc);
+struct spdk_bs_dev* spdk_bdev_create_bs_dev_from_desc(struct spdk_bdev_desc* desc);
 
 /**
  * Claim the bdev module for the given blobstore.
@@ -79,7 +79,7 @@ struct spdk_bs_dev *spdk_bdev_create_bs_dev_from_desc(struct spdk_bdev_desc *des
  *
  * \return 0 on success, negative errno on failure.
  */
-int spdk_bs_bdev_claim(struct spdk_bs_dev *bs_dev, struct spdk_bdev_module *module);
+int spdk_bs_bdev_claim(struct spdk_bs_dev* bs_dev, struct spdk_bdev_module* module);
 
 #ifdef __cplusplus
 }

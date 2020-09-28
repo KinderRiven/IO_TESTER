@@ -63,7 +63,6 @@ void event_1(void* arg1, void* arg2)
 void start_app(void* cb)
 {
     printf("start_app!\n");
-
     /*
     uint64_t* tick_1 = (uint64_t*)malloc(sizeof(uint64_t));
     *tick_1 = 500000;

@@ -16,3 +16,4 @@ SPDK_LINK_FLAGS= -Wl,--whole-archive  -Llib/dpdk -lspdk_env_dpdk  -lspdk_env_dpd
 all:
 	g++ -O0 bdev_example.cc -o bdev_example -I../include $(SPDK_LINK_FLAGS)
 	g++ -O0 reactor_example.cc -o reactor_example -I../include $(SPDK_LINK_FLAGS)
+    g++ -O0 blobstore_example.cc -o blobstore_example -I../include $(SPDK_LINK_FLAGS)
