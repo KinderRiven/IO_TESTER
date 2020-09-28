@@ -46,8 +46,7 @@ void test_blobstore(void* cb)
         printf("get bsdev device failed!\n");
         exit(0);
     }
-
-    spdk_bs_init(bsdev, bs_opts, bs_init_cb, nullptr);
+    spdk_bs_init(bsdev, &bs_opts, bs_init_cb, nullptr);
 }
 
 int main(int argc, char** argv)
