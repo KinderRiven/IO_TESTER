@@ -7,5 +7,8 @@ thread:
 task_queue:
 	g++ task_queue_test.cc -o task_queue_test -lpthread
 
+malloc:
+	g++ placement_new.cc -o  placement_new -lpthread
+
 clean:
 	rm -rf task_queue_test thread_add
