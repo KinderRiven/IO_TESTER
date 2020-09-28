@@ -122,7 +122,6 @@ void bs_init_cb(void* cb_arg, struct spdk_blob_store* bs, int bserrno)
 void test_blobstore(void* cb)
 {
     struct spdk_bdev* bdev;
-    printf("[%s][%s]\n", app_opts.config_file, nvme_device);
 
     // get spdk bdev layer device
     bdev = spdk_bdev_get_by_name(nvme_device);
@@ -135,7 +134,7 @@ void test_blobstore(void* cb)
     // bs = [b]lock[s]tore
     // Create a blobstore block device from a bdev. (deprecated, please use spdk_bdev_create_bs_dev_from_desc,
     // together with spdk_bdev_open_ext).
-    struct spdk_bs_dev bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
+    struct spdk_bs_dev *bsdev = spdk_bdev_create_bs_dev(bdev, nullptr, nullptr);
     if (bsdev == nullptr) {
         printf("[1] get bsdev device failed!\n");
         exit(0);
