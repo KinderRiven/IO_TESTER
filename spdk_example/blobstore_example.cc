@@ -27,7 +27,7 @@ struct spdk_bs_dev* bsdev;
 struct spdk_app_opts app_opts;
 struct spdk_blob* blos_store;
 
-const char* nvme_device[3] = { "Nvme0", "Nvme1", "Nvme2" };
+const char* nvme_device[3] = { "Nvme0n1", "Nvme1n1", "Nvme2n1" };
 
 void bdev_init_cb(void* cb_arg, int rc)
 {
