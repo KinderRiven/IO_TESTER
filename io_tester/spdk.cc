@@ -84,11 +84,7 @@ void init_spdk_device()
 
 void write_cb(void* arg, const struct spdk_nvme_cpl* completion)
 {
-    int* finished = (int*)arg;
-    if (spdk_nvme_cpl_is_error(completion)) {
-        printf("Something erro in write_callback!\n");
-    }
-    *finished = 1;
+    spdk_free(arg);
 }
 
 void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
@@ -101,18 +97,12 @@ void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
     struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(device->ctrlr, NULL, 0);
     assert(qpair != nullptr);
 
-    // new write buffer
-    char* buff = (char*)spdk_nvme_ctrlr_alloc_cmb_io_buffer(device->ctrlr, block_size); // 4KB
-    if (buff == nullptr) {
-        buff = (char*)spdk_zmalloc(block_size, block_size, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
-    }
-    memset(buff, 0xff, block_size);
-    assert(buff != nullptr);
-
     for (uint64_t i = 0; i < count; i++) {
         int c = 0;
         for (int j = 0; j < io_depth; j++) {
-            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, n_lba, nullptr, nullptr, 0);
+            char* buff = (char*)spdk_zmalloc(block_size, block_size, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
+            memset(buff, 0xff, block_size);
+            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, n_lba, write_cb, (void*)buff, 0);
             assert(rc == 0);
             k += n_lba;
         }
