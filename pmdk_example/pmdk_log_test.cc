@@ -14,9 +14,14 @@
 
 int main(int argc, char** argv)
 {
-    // void* addr = pmem_map_file("/home/pmem0/test", (size_t)1024 * 1024 * 1024, PMEM_FILE_CREATE, 0777, &mmap_len, &is_pmem);
-    PMEMlogpool* _pool = pmemlog_create("/home/pmem0/pool", (size_t)2 * 1024 * 1024 * 1024, 0666);
+    char _path[] = "/home/pmem0/pool";
+    int _is_pmem;
+    size_t _mmap_len;
+    void* addr = pmem_map_file(_path, (size_t)2 * 1024 * 1024 * 1024, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
+
+    PMEMlogpool* _pool = pmemlog_create(_path, (size_t)2 * 1024 * 1024 * 1024, 0666);
     assert(_pool != nullptr);
+
     size_t _nb = pmemlog_nbyte(_pool);
     printf("%zuMB\n", _nb / (1024 * 1024));
     return 0;
