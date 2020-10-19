@@ -90,7 +90,6 @@ void write_cb(void* arg, const struct spdk_nvme_cpl* completion)
 void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
 {
     assert(block_size % 512 == 0);
-
     uint64_t k = 0;
     uint64_t n_lba = block_size / 512;
     uint64_t count = (total_size / block_size) / io_depth;
