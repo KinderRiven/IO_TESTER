@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <algorithm>
 #include <assert.h>
 #include <fcntl.h>
 #include <linux/aio_abi.h>
@@ -10,7 +11,6 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
-#include <algorithm>
 #include <vector>
 
 #define OPT_RANDOM (1)
@@ -116,7 +116,15 @@ void do_seqwrite(struct worker_options* options)
             _pos = 0;
         }
     }
-    printf("[%d][SQE_WRITE][%zu]\n", _fd, options->vec_latency.size());
+
+    sort(options->vec_latency.begin(), options->vec_latency.end());
+    size_t _size = options->vec_latency.size();
+    size_t _p99_size = (size_t)(0.99 * _size);
+    size_t _p999_size = (size_t)(0.999 * _size);
+
+    printf("[%d][SEQ_WRITE][%zu/%zu:%lluus][%zu/%zu:%lluus]\n",
+        _fd, _p99_size, _size, options->vec_latency[_p99_size] / 1000,
+        _p999_size, _size, options->vec_latency[_p999_size] / 1000);
     free(_buff);
 }
 
@@ -150,7 +158,15 @@ void do_randread(struct worker_options* options)
             _pos = 0;
         }
     }
-    printf("[%d][RANDOM_READ][%zu]\n", _fd, options->vec_latency.size());
+
+    sort(options->vec_latency.begin(), options->vec_latency.end());
+    size_t _size = options->vec_latency.size();
+    size_t _p99_size = (size_t)(0.99 * _size);
+    size_t _p999_size = (size_t)(0.999 * _size);
+
+    printf("[%d][RANDOM_READ][%zu/%zu:%lluus][%zu/%zu:%lluus]\n",
+        _fd, _p99_size, _size, options->vec_latency[_p99_size] / 1000,
+        _p999_size, _size, options->vec_latency[_p999_size] / 1000);
     free(_buff);
 }
 
@@ -184,7 +200,15 @@ void do_seqread(struct worker_options* options)
             _pos = 0;
         }
     }
-    printf("[%d][SEQ_READ][%zu]\n", _fd, options->vec_latency.size());
+
+    sort(options->vec_latency.begin(), options->vec_latency.end());
+    size_t _size = options->vec_latency.size();
+    size_t _p99_size = (size_t)(0.99 * _size);
+    size_t _p999_size = (size_t)(0.999 * _size);
+
+    printf("[%d][SEQ_READ][%zu/%zu:%lluus][%zu/%zu:%lluus]\n",
+        _fd, _p99_size, _size, options->vec_latency[_p99_size] / 1000,
+        _p999_size, _size, options->vec_latency[_p999_size] / 1000);
     free(_buff);
 }
 
