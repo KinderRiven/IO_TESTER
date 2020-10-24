@@ -3,6 +3,7 @@
 #include <assert.h>
 #include <dirent.h>
 #include <fcntl.h>
+#include <fstream>
 #include <iostream>
 #include <linux/aio_abi.h>
 #include <pthread.h>
