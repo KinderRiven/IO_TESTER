@@ -110,10 +110,68 @@ void do_seqwrite(struct worker_options* options)
 
 void do_randread(struct worker_options* options)
 {
+    Timer _timer;
+    Timer _latency;
+    uint64_t _pos = 0;
+    int _fd = options->fd;
+    size_t _fs = options->file_size;
+    size_t _bs = options->block_size;
+    uint64_t _run_time = options->run_time;
+
+    void* _buff;
+    posix_memalign(&_buff, _bs, _bs);
+
+    _timer.Start();
+    while (true) {
+        _latency.Start();
+        pread(_fd, _buff, _bs, _pos);
+        _latency.Stop();
+
+        options->vec_latency.push_back(_latency.Get());
+        _timer.Stop();
+        if (_timer.Get() > _run_time) {
+            break;
+        }
+
+        _pos += RANDOM_SKIP;
+        if (_pos > _fs) {
+            _pos = 0;
+        }
+    }
+    free(_buff);
 }
 
 void do_seqread(struct worker_options* options)
 {
+    Timer _timer;
+    Timer _latency;
+    uint64_t _pos = 0;
+    int _fd = options->fd;
+    size_t _fs = options->file_size;
+    size_t _bs = options->block_size;
+    uint64_t _run_time = options->run_time;
+
+    void* _buff;
+    posix_memalign(&_buff, _bs, _bs);
+
+    _timer.Start();
+    while (true) {
+        _latency.Start();
+        pread(_fd, _buff, _bs, _pos);
+        _latency.Stop();
+
+        options->vec_latency.push_back(_latency.Get());
+        _timer.Stop();
+        if (_timer.Get() > _run_time) {
+            break;
+        }
+
+        _pos += _bs;
+        if (_pos > _fs) {
+            _pos = 0;
+        }
+    }
+    free(_buff);
 }
 
 void* run_benchmark(void* options)
