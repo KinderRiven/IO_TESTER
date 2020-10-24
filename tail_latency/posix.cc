@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <algorithm>
 #include <vector>
 
 #define OPT_RANDOM (1)
@@ -72,7 +73,15 @@ void do_randwrite(struct worker_options* options)
             _pos = 0;
         }
     }
-    printf("[%d][RANDOM_WRITE][%zu]\n", _fd, options->vec_latency.size());
+
+    sort(options->vec_latency.begin(), options->vec_latency.end());
+    size_t _size = options->vec_latency.size();
+    size_t _p99_size = (size_t)(0.99 * _size);
+    size_t _p999_size = (size_t)(0.999 * _size);
+
+    printf("[%d][RANDOM_WRITE][%zu/%zu:%lluus][%zu/%zu:%lluus]\n",
+        _fd, _p99_size, _size, options->vec_latency[_p99_size] / 1000,
+        _p999_size, _size, options->vec_latency[_p999_size] / 1000);
     free(_buff);
 }
 
