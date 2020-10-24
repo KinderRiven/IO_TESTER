@@ -119,7 +119,7 @@ void do_seqread(struct worker_options* options)
 void* run_benchmark(void* options)
 {
     struct thread_options* _opt = (struct thread_options*)options;
-    struct worker_options _w_opt;
+    struct worker_options _wopt;
 
     cpu_set_t mask;
     CPU_ZERO(&mask);
@@ -134,7 +134,7 @@ void* run_benchmark(void* options)
     _wopt.block_size = _opt->block_size;
     _wopt.file_size = _opt->file_size;
 
-    switch (opt->type) {
+    switch (_opt->type) {
     case OPT_WRITE | OPT_RANDOM:
         do_randwrite(&_wopt);
         break;
