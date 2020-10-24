@@ -135,16 +135,16 @@ void* run_benchmark(void* options)
     _wopt.file_size = _opt->file_size;
 
     switch (opt->type) {
-    case DO_RW:
+    case OPT_WRITE | OPT_RANDOM:
         do_randwrite(&_wopt);
         break;
-    case DO_SW:
+    case OPT_WRITE:
         do_seqwrite(&_wopt);
         break;
-    case DO_RR:
+    case OPT_READ | OPT_RANDOM:
         do_randread(&_wopt);
         break;
-    case DO_SR:
+    case OPT_READ:
         do_seqread(&_wopt);
         break;
     default:
@@ -180,7 +180,7 @@ int main(int argc, char** argv)
 
     int _num_thread = _num_write_thread + _num_read_thread;
 
-    for (int i = 0; i < num_thread; i++) {
+    for (int i = 0; i < _num_thread; i++) {
         int __fd;
         char __file_name[32];
         sprintf(__file_name, "%s/%d.io", _path, i);
