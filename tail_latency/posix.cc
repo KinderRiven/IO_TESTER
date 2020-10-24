@@ -25,6 +25,7 @@ public:
     int type;
     int thread_id;
     char path[128];
+    uint64_t time;
     size_t file_size;
     size_t block_size;
 };
