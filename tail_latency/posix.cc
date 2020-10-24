@@ -34,6 +34,7 @@ public:
 struct worker_options {
 public:
     int fd;
+    int thread_id;
     size_t file_size;
     size_t block_size;
 
@@ -41,6 +42,19 @@ public:
     uint64_t run_time;
     std::vector<uint64_t> vec_latency;
 };
+
+char g_result_save_path[128];
+
+static void result_output(const char* name, std::vector<uint64_t>& data)
+{
+    std::ofstream fout(name);
+    if (fout.is_open()) {
+        for (int i = 0; i < data.size(); i++) {
+            fout << data[i] << std::endl;
+        }
+        fout.close();
+    }
+}
 
 void do_randwrite(struct worker_options* options)
 {
@@ -57,6 +71,7 @@ void do_randwrite(struct worker_options* options)
     memset(_buff, 0xff, _bs);
 
     _timer.Start();
+
     while (true) {
         _latency.Start();
         pwrite(_fd, _buff, _bs, _pos);
@@ -74,11 +89,15 @@ void do_randwrite(struct worker_options* options)
         }
     }
 
+    int _thread_id = options->thread_id;
+    char _save_file_path[128];
+    sprintf(_save_file_path, "%s/%d_rw_%zu", g_result_save_path, _thread_id, _bs);
+    result_output(_save_file_path, options->vec_latency);
+
     sort(options->vec_latency.begin(), options->vec_latency.end());
     size_t _size = options->vec_latency.size();
     size_t _p99_size = (size_t)(0.99 * _size);
     size_t _p999_size = (size_t)(0.999 * _size);
-
     printf("[%d][RANDOM_WRITE][%zu/%zu:%lluus][%zu/%zu:%lluus]\n",
         _fd, _p99_size, _size, options->vec_latency[_p99_size] / 1000,
         _p999_size, _size, options->vec_latency[_p999_size] / 1000);
@@ -116,6 +135,11 @@ void do_seqwrite(struct worker_options* options)
             _pos = 0;
         }
     }
+
+    int _thread_id = options->thread_id;
+    char _save_file_path[128];
+    sprintf(_save_file_path, "%s/%d_sw_%zu", g_result_save_path, _thread_id, _bs);
+    result_output(_save_file_path, options->vec_latency);
 
     sort(options->vec_latency.begin(), options->vec_latency.end());
     size_t _size = options->vec_latency.size();
@@ -159,6 +183,11 @@ void do_randread(struct worker_options* options)
         }
     }
 
+    int _thread_id = options->thread_id;
+    char _save_file_path[128];
+    sprintf(_save_file_path, "%s/%d_rr_%zu", g_result_save_path, _thread_id, _bs);
+    result_output(_save_file_path, options->vec_latency);
+
     sort(options->vec_latency.begin(), options->vec_latency.end());
     size_t _size = options->vec_latency.size();
     size_t _p99_size = (size_t)(0.99 * _size);
@@ -201,6 +230,11 @@ void do_seqread(struct worker_options* options)
         }
     }
 
+    int _thread_id = options->thread_id;
+    char _save_file_path[128];
+    sprintf(_save_file_path, "%s/%d_sr_%zu", g_result_save_path, _thread_id, _bs);
+    result_output(_save_file_path, options->vec_latency);
+
     sort(options->vec_latency.begin(), options->vec_latency.end());
     size_t _size = options->vec_latency.size();
     size_t _p99_size = (size_t)(0.99 * _size);
@@ -227,6 +261,7 @@ void* run_benchmark(void* options)
     char _file_name[32];
     sprintf(_file_name, "%s/%d.io", _opt->path, _opt->thread_id);
     _wopt.fd = open(_file_name, O_RDWR | O_DIRECT, 0777);
+    _wopt.thread_id = _opt->thread_id;
     _wopt.block_size = _opt->block_size;
     _wopt.file_size = _opt->file_size;
     _wopt.run_time = _opt->time;
@@ -259,6 +294,9 @@ int main(int argc, char** argv)
         printf("./posix [path] [time] [write_type] [num_write_thread] [write_block_size] [read_type] [num_read_thread] [read_block_size]\n");
         exit(1);
     }
+
+    strcpy(g_result_save_path, "RESULT_SAVE_PATH");
+    mkdir(g_result_save_path, 0777);
 
     pthread_t thread_id[32];
     struct thread_options options[32];
