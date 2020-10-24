@@ -151,7 +151,7 @@ void* run_benchmark(void* options)
         printf("ERROR TYPE!\n");
         break;
     }
-    close(_wopt->fd);
+    close(_wopt.fd);
     return nullptr;
 }
 
