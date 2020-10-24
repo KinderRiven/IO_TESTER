@@ -71,6 +71,7 @@ void do_randwrite(struct worker_options* options)
             _pos = 0;
         }
     }
+    printf("[RANDOM_WRITE][%zu]\n", options->vec_latency.size());
     free(_buff);
 }
 
@@ -105,6 +106,7 @@ void do_seqwrite(struct worker_options* options)
             _pos = 0;
         }
     }
+    printf("[SQE_WRITE][%zu]\n", options->vec_latency.size());
     free(_buff);
 }
 
@@ -138,6 +140,7 @@ void do_randread(struct worker_options* options)
             _pos = 0;
         }
     }
+    printf("[RANDOM_RED][%zu]\n", options->vec_latency.size());
     free(_buff);
 }
 
@@ -171,6 +174,7 @@ void do_seqread(struct worker_options* options)
             _pos = 0;
         }
     }
+    printf("[SEQ_WRITE][%zu]\n", options->vec_latency.size());
     free(_buff);
 }
 
