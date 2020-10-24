@@ -14,6 +14,7 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <sys/syscall.h>
+#include <time.h>
 #include <unistd.h>
 #include <vector>
 
@@ -299,7 +300,9 @@ int main(int argc, char** argv)
         exit(1);
     }
 
-    strcpy(g_result_save_path, "RESULT_SAVE_PATH");
+    time_t _t = time(NULL);
+    struct tm* _lt = localtime(&_t);
+    sprintf(g_result_save_path, "[%04d_%02d_%02d]_[%02d_%02d_%02d]", _lt->tm_year, _lt->tm_mon, _lt->tm_mday, _lt->tm_hour, _lt->tm_min, _lt->tm_sec);
     mkdir(g_result_save_path, 0777);
 
     pthread_t thread_id[32];
