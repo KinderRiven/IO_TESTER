@@ -1,6 +1,7 @@
 #include "timer.h"
 #include <algorithm>
 #include <assert.h>
+#include <dirent.h>
 #include <fcntl.h>
 #include <linux/aio_abi.h>
 #include <pthread.h>
@@ -9,6 +10,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <sys/syscall.h>
 #include <unistd.h>
 #include <vector>
