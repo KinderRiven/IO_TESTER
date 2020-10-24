@@ -117,7 +117,8 @@ int main(int argc, char* argv[])
 
     uint64_t interval;
 
-    if (argc < 2) {
+    if (argc < 3) {
+        printf("./detail [dir] [dist]")
         return -1;
     }
 
