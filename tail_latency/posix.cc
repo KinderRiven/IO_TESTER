@@ -141,7 +141,7 @@ void do_randread(struct worker_options* options)
             _pos = 0;
         }
     }
-    printf("[RANDOM_RED][%zu]\n", options->vec_latency.size());
+    printf("[RANDOM_READ][%zu]\n", options->vec_latency.size());
     free(_buff);
 }
 
@@ -175,7 +175,7 @@ void do_seqread(struct worker_options* options)
             _pos = 0;
         }
     }
-    printf("[SEQ_WRITE][%zu]\n", options->vec_latency.size());
+    printf("[SEQ_READ][%zu]\n", options->vec_latency.size());
     free(_buff);
 }
 
@@ -261,7 +261,7 @@ int main(int argc, char** argv)
             options[i].type = OPT_READ;
             options[i].type |= _read_type;
         }
-        strcpy(options[i].path, argv[2]);
+        strcpy(options[i].path, _path);
         options[i].time = _time * (1000000000); //ns
         options[i].thread_id = i;
         options[i].block_size = _write_block_size;
