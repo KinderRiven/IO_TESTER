@@ -14,6 +14,7 @@ SPDK_LINK_FLAGS= -Wl,--whole-archive  -Llib/dpdk -lspdk_env_dpdk  -lspdk_env_dpd
 	-Wl,--no-whole-archive -lpthread -lrt -lnuma -ldl -luuid -lm -lisal
 
 all:
-	g++ -O0 io_tester/posix.cc -Iio_tester -Iinclude  -o posix -lpthread -lnuma
-	g++ -O0 io_tester/libaio.cc -Iio_tester -Iinclude -o libaio -lpthread -lnuma -laio
-	g++ -O0 io_tester/spdk.cc -Iio_tester -Iinclude -o spdk -Iinclude $(SPDK_LINK_FLAGS)
+	# g++ -O0 io_tester/posix.cc -Iio_tester -Iinclude  -o posix -lpthread -lnuma
+	# g++ -O0 io_tester/libaio.cc -Iio_tester -Iinclude -o libaio -lpthread -lnuma -laio
+	# g++ -O0 io_tester/spdk.cc -Iio_tester -Iinclude -o spdk -Iinclude $(SPDK_LINK_FLAGS)
+    g++ -O0 tail_latency/posix.cc -Iio_tester -Iinclude  -o posix -lpthread -lnuma
