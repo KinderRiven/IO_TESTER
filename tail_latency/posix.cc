@@ -199,16 +199,16 @@ void* run_benchmark(void* options)
     _wopt.run_time = _opt->time;
 
     switch (_opt->type) {
-    case OPT_WRITE | OPT_RANDOM:
+    case (OPT_WRITE | OPT_RANDOM):
         do_randwrite(&_wopt);
         break;
-    case OPT_WRITE:
+    case (OPT_WRITE):
         do_seqwrite(&_wopt);
         break;
-    case OPT_READ | OPT_RANDOM:
+    case (OPT_READ | OPT_RANDOM):
         do_randread(&_wopt);
         break;
-    case OPT_READ:
+    case (OPT_READ):
         do_seqread(&_wopt);
         break;
     default:
@@ -256,14 +256,10 @@ int main(int argc, char** argv)
     for (int i = 0; i < _num_thread; i++) {
         if (i < _num_write_thread) {
             options[i].type = OPT_WRITE;
-            if (_write_type) {
-                options[i].type |= OPT_RANDOM;
-            }
+            options[i].type |= _write_type;
         } else {
             options[i].type = OPT_READ;
-            if (_write_type) {
-                options[i].type |= OPT_RANDOM;
-            }
+            options[i].type |= _read_type;
         }
         strcpy(options[i].path, argv[2]);
         options[i].time = _time * (1000000000); //ns
