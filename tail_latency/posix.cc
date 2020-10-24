@@ -191,6 +191,7 @@ void* run_benchmark(void* options)
     _wopt.fd = open(_file_name, O_RDWR | O_DIRECT, 0777);
     _wopt.block_size = _opt->block_size;
     _wopt.file_size = _opt->file_size;
+    _wopt.time = _opt->time;
 
     switch (_opt->type) {
     case OPT_WRITE | OPT_RANDOM:
@@ -260,6 +261,7 @@ int main(int argc, char** argv)
             }
         }
         strcpy(options[i].path, argv[2]);
+        options[i].time = _time * (1000000000); //ns
         options[i].thread_id = i;
         options[i].block_size = _write_block_size;
         options[i].file_size = _file_size;
