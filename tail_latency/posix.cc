@@ -195,7 +195,7 @@ void* run_benchmark(void* options)
     _wopt.fd = open(_file_name, O_RDWR | O_DIRECT, 0777);
     _wopt.block_size = _opt->block_size;
     _wopt.file_size = _opt->file_size;
-    _wopt.time = _opt->time;
+    _wopt.run_time = _opt->time;
 
     switch (_opt->type) {
     case OPT_WRITE | OPT_RANDOM:
