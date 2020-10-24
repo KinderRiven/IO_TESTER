@@ -10,3 +10,4 @@ git add fio
 git add third-party/*.zip third-party/README.md
 git commit -m "commit by Shukai Han"
 git push
+git detail.cc

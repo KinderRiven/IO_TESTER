@@ -19,3 +19,7 @@ all:
 	# g++ -O0 io_tester/spdk.cc -Iio_tester -Iinclude -o spdk -Iinclude $(SPDK_LINK_FLAGS)
 	g++ -O0 tail_latency/posix.cc -Iio_tester -Iinclude  -o posix -lpthread -lnuma
 
+
+detail: detail.cc
+	g++ -std=c++11 detail.cc -o detail
+
