@@ -61,6 +61,20 @@ static void result_output(const char* name, std::vector<uint64_t>& data)
     }
 }
 
+// 16KB
+static void fulling_file(int fd, size_t file_size)
+{
+    char _buff[16384];
+    memset(_buff, 0xff, 16384);
+    uint64_t _pos = 0;
+    size_t _count = file_size / 16384;
+
+    for (size_t i = 0; i < _count; i++) {
+        pwrite(fd, _buff, 16384, _pos);
+        _pos += 16384;
+    }
+}
+
 void do_randwrite(struct worker_options* options)
 {
     Timer _timer;
@@ -328,6 +342,7 @@ int main(int argc, char** argv)
         sprintf(__file_name, "%s/%d.io", _path, i);
         __fd = open(__file_name, O_RDWR | O_CREAT, 0777);
         fallocate(__fd, 0, 0, _file_size);
+        fulling_file(__fd, _file_size);
         close(__fd);
     }
 
