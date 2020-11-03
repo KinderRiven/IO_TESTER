@@ -336,15 +336,18 @@ int main(int argc, char** argv)
 
     int _num_thread = _num_write_thread + _num_read_thread;
 
+    // use script to create test file
+    /*
     for (int i = 0; i < _num_thread; i++) {
         int __fd;
         char __file_name[32];
         sprintf(__file_name, "%s/%d.io", _path, i);
         __fd = open(__file_name, O_RDWR | O_CREAT, 0777);
         fallocate(__fd, 0, 0, _file_size);
-        fulling_file(__fd, _file_size);
+        // fulling_file(__fd, _file_size);
         close(__fd);
     }
+    */
 
     for (int i = 0; i < _num_thread; i++) {
         if (i < _num_write_thread) {

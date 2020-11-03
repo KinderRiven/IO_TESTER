@@ -18,7 +18,11 @@
 
 struct thread_options {
 public:
-    int type;
+    int read_type;
+    int write_type;
+    double read_percentage;
+
+public:
     int thread_id;
     char path[128];
     uint64_t time;
@@ -28,10 +32,12 @@ public:
 
 struct worker_options {
 public:
-    int fd;
+    int read_fd;
+    int write_fd;
     int thread_id;
     size_t file_size;
     size_t block_size;
+    double read_percentage;
 
 public:
     uint64_t run_time;
@@ -151,7 +157,7 @@ int main(int argc, char** argv)
 
     time_t _t = time(NULL);
     struct tm* _lt = localtime(&_t);
-    sprintf(g_result_save_path, "%04d%02d%02d_%02d%02d%02d", _lt->tm_year, _lt->tm_mon, _lt->tm_mday, _lt->tm_hour, _lt->tm_min, _lt->tm_sec);
+    sprintf(g_result_save_path, "%04d%02d%02d_%02d%02d%02d_aio", _lt->tm_year, _lt->tm_mon, _lt->tm_mday, _lt->tm_hour, _lt->tm_min, _lt->tm_sec);
     mkdir(g_result_save_path, 0777);
 
     pthread_t thread_id[32];
@@ -161,16 +167,16 @@ int main(int argc, char** argv)
     uint64_t _time = atol(argv[2]);
     size_t _file_size = (size_t)FILE_SIZE * (1024 * 1024 * 1024);
 
-    int _write_type = atol(argv[3]);
-    int _num_write_thread = atol(argv[4]);
-    size_t _write_block_size = atol(argv[5]);
+    int _num_thread = atol(argv[3]);
+    double _read_percentage = atof(argv[4]);
 
-    int _read_type = atol(argv[6]);
-    int _num_read_thread = atol(argv[7]);
+    int _write_type = atol(argv[5]);
+    size_t _write_block_size = atol(argv[6]);
+
+    int _read_type = atol(argv[7]);
     size_t _read_block_size = atol(argv[8]);
 
-    int _num_thread = _num_write_thread + _num_read_thread;
-
+    /*
     for (int i = 0; i < _num_thread; i++) {
         int __fd;
         char __file_name[32];
@@ -180,15 +186,13 @@ int main(int argc, char** argv)
         fallocate(__fd, 0, 0, _file_size);
         close(__fd);
     }
+    */
 
     for (int i = 0; i < _num_thread; i++) {
-        if (i < _num_write_thread) {
-            options[i].type = OPT_WRITE;
-            options[i].type |= _write_type;
-        } else {
-            options[i].type = OPT_READ;
-            options[i].type |= _read_type;
-        }
+        options[i].read_type = OPT_WRITE;
+        options[i].read_type |= _write_type;
+        options[i].write_type = OPT_READ;
+        options[i].write_type |= _read_type;
         strcpy(options[i].path, _path);
         options[i].time = _time * (1000000000); //ns
         options[i].thread_id = i;
