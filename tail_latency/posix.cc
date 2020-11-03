@@ -23,7 +23,7 @@
 #define OPT_WRITE (2)
 
 // GB
-#define FILE_SIZE (16)
+#define FILE_SIZE (128)
 #define RANDOM_SKIP (16384)
 
 struct thread_options {
@@ -58,6 +58,19 @@ static void result_output(const char* name, std::vector<uint64_t>& data)
             fout << data[i] << std::endl;
         }
         fout.close();
+    }
+}
+
+static void ff_file(int fd, size_t sz)
+{
+    size_t _blk = 16384;
+    size_t _cnt = sz / _blk;
+
+    char* _p = (char*)malloc(_blk);
+    memset((void*)_p, 0xff, _blk);
+
+    for (size_t i = 0; i < _cnt; i++) {
+        write(fd, _p, _blk);
     }
 }
 
@@ -295,8 +308,8 @@ void* run_benchmark(void* options)
 // #define USE_FALLOCATE
 int main(int argc, char** argv)
 {
-    if (argc < 9) {
-        printf("./posix [path] [time] [write_type] [num_write_thread] [write_block_size] [read_type] [num_read_thread] [read_block_size]\n");
+    if (argc < 10) {
+        printf("./posix [path] [file_size(GB)] [time] [write_type] [num_write_thread] [write_block_size] [read_type] [num_read_thread] [read_block_size]\n");
         exit(1);
     }
 
@@ -309,16 +322,16 @@ int main(int argc, char** argv)
     struct thread_options options[32];
 
     char* _path = argv[1];
-    uint64_t _time = atol(argv[2]);
-    size_t _file_size = (size_t)FILE_SIZE * (1024 * 1024 * 1024);
+    size_t _file_size = 1UL * atol(argv[2]) * (1024 * 1024 * 1024);
+    uint64_t _time = atol(argv[3]);
 
-    int _write_type = atol(argv[3]);
-    int _num_write_thread = atol(argv[4]);
-    size_t _write_block_size = atol(argv[5]);
+    int _write_type = atol(argv[4]);
+    int _num_write_thread = atol(argv[5]);
+    size_t _write_block_size = atol(argv[6]);
 
-    int _read_type = atol(argv[6]);
-    int _num_read_thread = atol(argv[7]);
-    size_t _read_block_size = atol(argv[8]);
+    int _read_type = atol(argv[7]);
+    int _num_read_thread = atol(argv[8]);
+    size_t _read_block_size = atol(argv[9]);
 
     int _num_thread = _num_write_thread + _num_read_thread;
 
@@ -328,7 +341,8 @@ int main(int argc, char** argv)
         char __file_name[32];
         sprintf(__file_name, "%s/%d.io", _path, i);
         __fd = open(__file_name, O_RDWR | O_CREAT, 0777);
-        fallocate(__fd, 0, 0, _file_size);
+        // fallocate(__fd, 0, 0, _file_size);
+        ff_file(__fd, _file_size);
         close(__fd);
     }
 
