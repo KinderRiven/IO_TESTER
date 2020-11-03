@@ -61,17 +61,18 @@ static void result_output(const char* name, std::vector<uint64_t>& data)
     }
 }
 
+// fill file
 static void ff_file(int fd, size_t sz)
 {
     size_t _blk = 16384;
     size_t _cnt = sz / _blk;
-
     char* _p = (char*)malloc(_blk);
     memset((void*)_p, 0xff, _blk);
 
     for (size_t i = 0; i < _cnt; i++) {
         write(fd, _p, _blk);
     }
+    fsync(fd);
 }
 
 void do_randwrite(struct worker_options* options)
