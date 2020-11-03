@@ -342,6 +342,7 @@ int main(int argc, char** argv)
         sprintf(__file_name, "%s/%d.io", _path, i);
         __fd = open(__file_name, O_RDWR | O_CREAT, 0777);
         fallocate(__fd, 0, 0, _file_size);
+        printf("filling %s\n", __file_name);
         ff_file(__fd, _file_size);
         close(__fd);
     }
