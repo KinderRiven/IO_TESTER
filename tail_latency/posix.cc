@@ -110,7 +110,7 @@ void do_randwrite(struct worker_options* options)
 
     int _thread_id = options->thread_id;
     char _save_file_path[128];
-    sprintf(_save_file_path, "%s/%d_rw_%zu", g_result_save_path, _thread_id, _bs);
+    sprintf(_save_file_path, "%s/%d_rw_%zu.lat", g_result_save_path, _thread_id, _bs);
     result_output(_save_file_path, options->vec_latency);
 
     sort(options->vec_latency.begin(), options->vec_latency.end());
@@ -157,7 +157,7 @@ void do_seqwrite(struct worker_options* options)
 
     int _thread_id = options->thread_id;
     char _save_file_path[128];
-    sprintf(_save_file_path, "%s/%d_sw_%zu", g_result_save_path, _thread_id, _bs);
+    sprintf(_save_file_path, "%s/%d_sw_%zu.lat", g_result_save_path, _thread_id, _bs);
     result_output(_save_file_path, options->vec_latency);
 
     sort(options->vec_latency.begin(), options->vec_latency.end());
@@ -204,7 +204,7 @@ void do_randread(struct worker_options* options)
 
     int _thread_id = options->thread_id;
     char _save_file_path[128];
-    sprintf(_save_file_path, "%s/%d_rr_%zu", g_result_save_path, _thread_id, _bs);
+    sprintf(_save_file_path, "%s/%d_rr_%zu.lat", g_result_save_path, _thread_id, _bs);
     result_output(_save_file_path, options->vec_latency);
 
     sort(options->vec_latency.begin(), options->vec_latency.end());
@@ -251,7 +251,7 @@ void do_seqread(struct worker_options* options)
 
     int _thread_id = options->thread_id;
     char _save_file_path[128];
-    sprintf(_save_file_path, "%s/%d_sr_%zu", g_result_save_path, _thread_id, _bs);
+    sprintf(_save_file_path, "%s/%d_sr_%zu.lat", g_result_save_path, _thread_id, _bs);
     result_output(_save_file_path, options->vec_latency);
 
     sort(options->vec_latency.begin(), options->vec_latency.end());
