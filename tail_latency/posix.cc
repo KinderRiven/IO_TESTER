@@ -122,7 +122,7 @@ void do_randwrite(struct worker_options* options)
         _p999_size, _size, options->vec_latency[_p999_size] / 1000);
     free(_buff);
 }
-
+ 
 void do_seqwrite(struct worker_options* options)
 {
     Timer _timer;
