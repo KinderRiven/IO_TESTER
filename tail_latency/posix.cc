@@ -66,13 +66,15 @@ static void ff_file(int fd, size_t sz)
 {
     size_t _blk = 16384;
     size_t _cnt = sz / _blk;
-    char* _p = (char*)malloc(_blk);
-    memset((void*)_p, 0xff, _blk);
 
+    void* _p;
+    posix_memalign(&_p, _blk, _blk);
+    // _p = (char*)malloc(_blk);
+    memset((void*)_p, 0xff, _blk);
     for (size_t i = 0; i < _cnt; i++) {
         write(fd, _p, _blk);
     }
-    fsync(fd);
+    // fsync(fd);
 }
 
 void do_randwrite(struct worker_options* options)
@@ -122,7 +124,7 @@ void do_randwrite(struct worker_options* options)
         _p999_size, _size, options->vec_latency[_p999_size] / 1000);
     free(_buff);
 }
- 
+
 void do_seqwrite(struct worker_options* options)
 {
     Timer _timer;
@@ -341,7 +343,7 @@ int main(int argc, char** argv)
         int __fd;
         char __file_name[32];
         sprintf(__file_name, "%s/%d.io", _path, i);
-        __fd = open(__file_name, O_RDWR | O_CREAT, 0777);
+        __fd = open(__file_name, O_RDWR | O_CREAT | O_DIRECT, 0777);
         fallocate(__fd, 0, 0, _file_size);
         printf("filling %s\n", __file_name);
         ff_file(__fd, _file_size);
