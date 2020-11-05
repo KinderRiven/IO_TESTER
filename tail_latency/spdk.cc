@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <assert.h>
 #include <fcntl.h>
+#include <iostream>
 #include <pthread.h>
 #include <stdint.h>
 #include <stdio.h>
