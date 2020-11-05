@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     int _res;
     spdk_device_t _dev;
     _dev.transport_string = "trtype:PCIe traddr:0000:19:00.0";
-    _res = spdk_nvme_transport_id_parse(_dev.trid, _dev.transport_string.c_str());
+    _res = spdk_nvme_transport_id_parse(&_dev.trid, _dev.transport_string.c_str());
 
     init_spdk_device(&_dev);
     printf("[%s-%zuGB]\n", _dev.transport_string.c_str(), _dev.capacity / (1024 * 1024 * 1024));
