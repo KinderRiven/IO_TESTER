@@ -262,7 +262,7 @@ int main(int argc, char** argv)
     printf("[%s-%zuGB]\n", _dev.transport_string.c_str(), _dev.ns_capacity / (1024 * 1024 * 1024));
 
     _options.io_depth = 16;
-    _options.read_ratio = 0.2;
+    _options.read_ratio = 1.0;
     _options.size = (size_t)16 * 1024 * 1024;
     _options.read_bs = 4096;
     _options.write_bs = 4096;
