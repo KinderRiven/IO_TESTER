@@ -1,4 +1,5 @@
 #include "timer.h"
+#include <algorithm>
 #include <assert.h>
 #include <fcntl.h>
 #include <pthread.h>
