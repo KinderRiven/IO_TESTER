@@ -33,6 +33,15 @@ public:
     struct spdk_nvme_ns* ns;
 };
 
+struct worker_options {
+public:
+    int io_depth;
+    double read_ratio; // = read : write
+    size_t size;
+    size_t read_bs;
+    size_t write_bs;
+};
+
 static bool probe_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
 {
     printf("prob_cb\n");
@@ -75,43 +84,105 @@ void init_spdk_device(spdk_device_t* device)
     printf("spdk_nvme_probe.[%d]\n", res);
 }
 
+struct cb_t {
+public:
+    void* buff;
+    Timer timer;
+};
+
 void write_cb(void* arg, const struct spdk_nvme_cpl* completion)
 {
-    spdk_free(arg);
+    cb_t* _cb = (cb_t*)arg;
+    _cb->timer.Stop();
+    spdk_free(_cb->buff);
 }
 
-/*
-void do_seqwrite(spdk_device_t* device, size_t block_size, size_t total_size)
+void read_cb(void* arg, const struct spdk_nvme_cpl* completion)
 {
-    assert(block_size % 512 == 0);
-    uint64_t k = 0;
-    uint64_t n_lba = block_size / 512;
-    uint64_t count = (total_size / block_size) / io_depth;
-    struct spdk_nvme_qpair* qpair = spdk_nvme_ctrlr_alloc_io_qpair(device->ctrlr, NULL, 0);
-    assert(qpair != nullptr);
+    cb_t* _cb = (cb_t*)arg;
+    _cb->timer.Stop();
+    spdk_free(_cb->buff);
+}
 
-    for (uint64_t i = 0; i < count; i++) {
-        int c = 0;
-        for (int j = 0; j < io_depth; j++) {
-            char* buff = (char*)spdk_zmalloc(block_size, block_size, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
-            memset(buff, 0xff, block_size);
-            int rc = spdk_nvme_ns_cmd_write(device->ns, qpair, buff, k, n_lba, write_cb, (void*)buff, 0);
+void do_readwrite(spdk_device_t* device, struct worker_options* options)
+{
+    int _io_depth = options->io_depth;
+    int _num_read = (int)(options->read_ratio * _io_depth);
+    int _num_write = _io_depth - _num_read;
+
+    std::vector<uint64_t> _read_latency;
+    std::vector<uint64_t> _write_latency;
+
+    size_t _read_bs = options->read_bs;
+    size_t _write_bs = options->write_bs;
+    uint32_t _read_lba = _read_bs / 512;
+    uint32_t _write_lba = _write_bs / 512;
+
+    struct spdk_nvme_qpair* _qpair = spdk_nvme_ctrlr_alloc_io_qpair(device->ctrlr, nullptr, 0);
+    assert(_qpair != nullptr);
+
+    uint32_t _read_base = 0;
+    uint32_t _read_upper = _read_base + options->size / 512;
+    uint32_t _write_base = 0;
+    uint32_t _write_upper = _write_base + options->size / 512;
+
+    uint32_t _read_pos = 0;
+    uint32_t _write_pos = _write_base;
+
+    while (true) {
+
+        int __c = 0;
+        cb_t __cbs[64];
+
+        // frist send read
+        for (int i = 0; i < _num_read; i++) {
+            __cbs[__c].timer.Start();
+            char* __buff = (char*)spdk_zmalloc(_read_bs, _read_bs, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
+            __cbs[__c].buff = __buff;
+            int __rc = spdk_nvme_ns_cmd_read(device->ns, _qpair, __buff, _read_pos, _read_lba, read_cb, nullptr, 0);
             assert(rc == 0);
-            k += n_lba;
+            _read_pos += _read_lba;
+            if (_read_pos >= _read_upper) {
+                _read_pos = _read_base;
+            }
+            __c++;
         }
+
+        // then send write
+        for (int i = 0; i < _num_write; i++) {
+            __cbs[__c].timer.Start();
+            char* __buff = (char*)spdk_zmalloc(_write_bs, _write_bs, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
+            __cbs[__c].buff = __buff;
+            memset(__buff, 0xff, _write_bs);
+            int __rc = spdk_nvme_ns_cmd_write(device->ns, _qpair, __buff, _write_pos, _write_lba, write_cb, nullptr, 0);
+            assert(rc == 0);
+            _write_pos += _write_lba;
+            if (_write_pos >= _write_upper) {
+                _write_pos = _write_base;
+            }
+            __c++;
+        }
+
+        int __cnt = 0;
         while (true) {
-            int num = spdk_nvme_qpair_process_completions(qpair, 0);
-            c += num;
-            if (c == io_depth) {
+            int __num = spdk_nvme_qpair_process_completions(_qpair, 0);
+            __cnt += __num;
+            if (__cnt == _io_depth) {
                 break;
             }
         }
-    }
-    spdk_nvme_ctrlr_free_io_qpair(qpair);
-}
-*/
 
-// #define USE_FALLOCATE
+        for (int i = 0; i < _io_depth; i++) {
+            if (i < _num_read) {
+                _read_latency.push_back(__cbs[i].timer.Get());
+            } else {
+                _write_latency.push_back(__cbs[i].timer.Get());
+            }
+        }
+    }
+    spdk_nvme_ctrlr_free_io_qpair(_qpair);
+}
+
 int main(int argc, char** argv)
 {
     int _res;
