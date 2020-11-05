@@ -41,7 +41,21 @@ public:
     size_t size;
     size_t read_bs;
     size_t write_bs;
+    uint64_t time_ns;
 };
+
+std::string g_save_path;
+
+static void result_output(const char* name, std::vector<uint64_t>& data)
+{
+    std::ofstream fout(name);
+    if (fout.is_open()) {
+        for (int i = 0; i < data.size(); i++) {
+            fout << data[i] << std::endl;
+        }
+        fout.close();
+    }
+}
 
 static bool probe_cb(void* cb_ctx, const struct spdk_nvme_transport_id* trid, struct spdk_nvme_ctrlr_opts* opts)
 {
@@ -105,12 +119,36 @@ void read_cb(void* arg, const struct spdk_nvme_cpl* completion)
     spdk_free(_cb->buff);
 }
 
+static void get_avg_latency(std::vector<uint64_t>& vec_opt_latency)
+{
+    size_t size = vec_opt_latency.size();
+    uint64_t sum = 0;
+    for (size_t i = 0; i < size; i++) {
+        sum += vec_opt_latency[i];
+    }
+    sum /= size;
+    printf("  [Average]:%9lluns\n", sum);
+    return;
+}
+
+static void get_tail_latency(std::vector<uint64_t>& vec_opt_latency, double p)
+{
+    size_t idx;
+    size_t size;
+    size = vec_opt_latency.size();
+    idx = (size_t)(1.0 * size * p);
+    printf("  [%.2fth]:%9lluns|(%9zu/%-9zu)\n", 100.0 * p, vec_opt_latency[idx], idx, size);
+    return;
+}
+
 void do_readwrite(spdk_device_t* device, struct worker_options* options)
 {
     int _io_depth = options->io_depth;
     int _num_read = (int)(options->read_ratio * _io_depth);
     int _num_write = _io_depth - _num_read;
 
+    Timer _run_timer;
+    uint64_t _time_ns = options->time_ns;
     std::vector<uint64_t> _read_latency;
     std::vector<uint64_t> _write_latency;
 
@@ -130,11 +168,10 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
     uint32_t _read_pos = 0;
     uint32_t _write_pos = _write_base;
 
+    _run_timer.Start();
     while (true) {
-
         int __c = 0;
         cb_t __cbs[64];
-
         // frist send read
         for (int i = 0; i < _num_read; i++) {
             __cbs[__c].timer.Start();
@@ -148,7 +185,6 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
             }
             __c++;
         }
-
         // then send write
         for (int i = 0; i < _num_write; i++) {
             __cbs[__c].timer.Start();
@@ -163,7 +199,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
             }
             __c++;
         }
-
+        // waiting
         int __cnt = 0;
         while (true) {
             int __num = spdk_nvme_qpair_process_completions(_qpair, 0);
@@ -172,7 +208,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
                 break;
             }
         }
-
+        // io depth
         for (int i = 0; i < _io_depth; i++) {
             if (i < _num_read) {
                 _read_latency.push_back(__cbs[i].timer.Get());
@@ -180,19 +216,49 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
                 _write_latency.push_back(__cbs[i].timer.Get());
             }
         }
+
+        _run_timer.Stop();
+        if (_run_timer.Get() > _time_ns) {
+            break;
+        }
     }
     spdk_nvme_ctrlr_free_io_qpair(_qpair);
+
+    char _save_path[128];
+    sprintf(_save_path, "%s/read.lat", g_save_path.c_str());
+    result_output(_save_path, _read_latency);
+    printf("---read---\n");
+    sort(_read_latency.begin(), _read_latency.end());
+    get_tail_latency(_read_latency, 0.99);
+    get_tail_latency(_read_latency, 0.999);
+
+    sprintf(__save_path, "%s/write.lat", g_save_path.c_str());
+    result_output(_save_path, _write_latency);
+    printf("---write---\n");
+    sort(_write_latency.begin(), _write_latency.end());
+    get_tail_latency(_write_latency, 0.99);
+    get_tail_latency(_write_latency, 0.999);
 }
 
 int main(int argc, char** argv)
 {
     int _res;
     spdk_device_t _dev;
+    struct worker_options _options;
     _dev.transport_string = "trtype:PCIe traddr:0000:18:00.0";
     _res = spdk_nvme_transport_id_parse(&_dev.trid, _dev.transport_string.c_str());
 
     init_spdk_device(&_dev);
     printf("[%s-%zuGB]\n", _dev.transport_string.c_str(), _dev.ns_capacity / (1024 * 1024 * 1024));
+
+    _options.io_depth = 16;
+    _options.read_ratio = 0.2;
+    _options.size = (size_t)16 * 1024 * 1024;
+    _options.read_bs = 4096;
+    _options.write_bs = 4096;
+    _options.time_ns = (uint64_t)30 * 1000000000UL;
+
+    do_readwrite(_dev, _options);
 
     spdk_nvme_detach(_dev.ctrlr);
     return 0;
