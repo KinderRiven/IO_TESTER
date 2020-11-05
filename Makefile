@@ -1,5 +1,5 @@
-SPDK_LINK_FLAGS= -Wl,--whole-archive  -Llib/dpdk -lspdk_env_dpdk  -lspdk_env_dpdk_rpc \
-    -Llib/spdk -ldpdk  \
+SPDK_LINK_FLAGS= -Wl,--whole-archive  -Lthird-party/dpdk -lspdk_env_dpdk  -lspdk_env_dpdk_rpc \
+    -Lthird-party/spdk -ldpdk  \
     -lspdk_json -lspdk_jsonrpc -lspdk_log_rpc  -lspdk_app_rpc  -lspdk_rpc \
     -lspdk_bdev_rpc -lspdk_bdev_null -lspdk_bdev_malloc \
     -lspdk_bdev_nvme -lspdk_bdev_zone_block \
