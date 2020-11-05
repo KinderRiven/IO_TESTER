@@ -45,7 +45,7 @@ public:
     uint64_t time_ns;
 };
 
-std::string g_save_path;
+char g_save_path[128];
 
 static void result_output(const char* name, std::vector<uint64_t>& data)
 {
@@ -226,14 +226,14 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
     spdk_nvme_ctrlr_free_io_qpair(_qpair);
 
     char _save_path[128];
-    sprintf(_save_path, "%s/read.lat", g_save_path.c_str());
+    sprintf(_save_path, "%s/read.lat", g_save_path);
     result_output(_save_path, _read_latency);
     printf("---read---\n");
     sort(_read_latency.begin(), _read_latency.end());
     get_tail_latency(_read_latency, 0.99);
     get_tail_latency(_read_latency, 0.999);
 
-    sprintf(__save_path, "%s/write.lat", g_save_path.c_str());
+    sprintf(__save_path, "%s/write.lat", g_save_path);
     result_output(_save_path, _write_latency);
     printf("---write---\n");
     sort(_write_latency.begin(), _write_latency.end());
