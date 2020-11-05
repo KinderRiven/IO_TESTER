@@ -233,7 +233,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
     get_tail_latency(_read_latency, 0.99);
     get_tail_latency(_read_latency, 0.999);
 
-    sprintf(__save_path, "%s/write.lat", g_save_path);
+    sprintf(_save_path, "%s/write.lat", g_save_path);
     result_output(_save_path, _write_latency);
     printf("---write---\n");
     sort(_write_latency.begin(), _write_latency.end());
