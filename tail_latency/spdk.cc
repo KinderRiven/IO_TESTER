@@ -71,7 +71,7 @@ void init_spdk_device(spdk_device_t* device)
     res = spdk_env_init(&opts);
     printf("spdk_env_init.[%d]\n", res);
 
-    res = spdk_nvme_probe(device->trid, (void*)device, probe_cb, attach_cb, remove_cb);
+    res = spdk_nvme_probe(&device->trid, (void*)device, probe_cb, attach_cb, remove_cb);
     printf("spdk_nvme_probe.[%d]\n", res);
 }
 
