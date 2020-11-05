@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include <sys/syscall.h>
 #include <unistd.h>
+#include <vector>
 
 #include "spdk/env.h"
 #include "spdk/nvme.h"
