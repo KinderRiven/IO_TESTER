@@ -232,6 +232,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
     result_output(_save_path, _read_latency);
     printf("---read---\n");
     sort(_read_latency.begin(), _read_latency.end());
+    get_avg_latency(_read_latency);
     get_tail_latency(_read_latency, 0.99);
     get_tail_latency(_read_latency, 0.999);
 
@@ -239,6 +240,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
     result_output(_save_path, _write_latency);
     printf("---write---\n");
     sort(_write_latency.begin(), _write_latency.end());
+    get_avg_latency(_write_latency);
     get_tail_latency(_write_latency, 0.99);
     get_tail_latency(_write_latency, 0.999);
 }
