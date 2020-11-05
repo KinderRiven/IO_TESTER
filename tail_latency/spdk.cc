@@ -228,10 +228,6 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
     spdk_nvme_ctrlr_free_io_qpair(_qpair);
 
     char _save_path[128];
-    time_t _t = time(NULL);
-    struct tm* _lt = localtime(&_t);
-    sprintf(g_save_path, "%04d%02d%02d_%02d%02d%02d", _lt->tm_year, _lt->tm_mon, _lt->tm_mday, _lt->tm_hour, _lt->tm_min, _lt->tm_sec);
-    mkdir(g_save_path, 0777);
 
     if (_read_latency.size() > 0) {
         sprintf(_save_path, "%s/read.lat", g_save_path);
@@ -259,7 +255,6 @@ int main(int argc, char** argv)
     if (argc < 6) {
         printf("./spdk [time] [io_depth] [size] [read_ratio] [read_block] [write_block]\n");
     }
-
     uint64_t _time = atol(argv[1]);
     int _io_depth = atol(argv[2]);
     size_t _size = atol(argv[3]);
@@ -282,6 +277,11 @@ int main(int argc, char** argv)
     _options.read_bs = _read_bs;
     _options.write_bs = _write_bs;
     _options.time_ns = _time * 1000000000UL;
+
+    time_t _t = time(NULL);
+    struct tm* _lt = localtime(&_t);
+    sprintf(g_save_path, "%04d%02d%02d_%02d%02d%02d_%d-%.2f", _lt->tm_year, _lt->tm_mon, _lt->tm_mday, _lt->tm_hour, _lt->tm_min, _lt->tm_sec, _io_depth, _read_ratio);
+    mkdir(g_save_path, 0777);
 
     do_readwrite(&_dev, &_options);
 
