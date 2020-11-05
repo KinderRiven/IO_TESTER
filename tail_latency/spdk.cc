@@ -180,7 +180,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
             __cbs[__c].timer.Start();
             char* __buff = (char*)spdk_zmalloc(_read_bs, _read_bs, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
             __cbs[__c].buff = __buff;
-            int __rc = spdk_nvme_ns_cmd_read(device->ns, _qpair, __buff, _read_pos, _read_lba, read_cb, nullptr, 0);
+            int __rc = spdk_nvme_ns_cmd_read(device->ns, _qpair, __buff, _read_pos, _read_lba, read_cb, &__cbs[__c], 0);
             assert(__rc == 0);
             _read_pos += _read_lba;
             if (_read_pos >= _read_upper) {
@@ -194,7 +194,7 @@ void do_readwrite(spdk_device_t* device, struct worker_options* options)
             char* __buff = (char*)spdk_zmalloc(_write_bs, _write_bs, nullptr, SPDK_ENV_SOCKET_ID_ANY, SPDK_MALLOC_DMA);
             __cbs[__c].buff = __buff;
             memset(__buff, 0xff, _write_bs);
-            int __rc = spdk_nvme_ns_cmd_write(device->ns, _qpair, __buff, _write_pos, _write_lba, write_cb, nullptr, 0);
+            int __rc = spdk_nvme_ns_cmd_write(device->ns, _qpair, __buff, _write_pos, _write_lba, write_cb, &__cbs[__c], 0);
             assert(__rc == 0);
             _write_pos += _write_lba;
             if (_write_pos >= _write_upper) {
