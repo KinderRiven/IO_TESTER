@@ -120,7 +120,7 @@ int main(int argc, char** argv)
     _res = spdk_nvme_transport_id_parse(&_dev.trid, _dev.transport_string.c_str());
 
     init_spdk_device(&_dev);
-    printf("[%s-%zuGB]\n", _dev.transport_string.c_str(), _dev.capacity / (1024 * 1024 * 1024));
+    printf("[%s-%zuGB]\n", _dev.transport_string.c_str(), _dev.ns_capacity / (1024 * 1024 * 1024));
 
     spdk_nvme_detach(_dev.ctrlr);
     return 0;
