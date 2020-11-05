@@ -265,7 +265,7 @@ int main(int argc, char** argv)
     _options.write_bs = 4096;
     _options.time_ns = (uint64_t)30 * 1000000000UL;
 
-    do_readwrite(_dev, _options);
+    do_readwrite(&_dev, &_options);
 
     spdk_nvme_detach(_dev.ctrlr);
     return 0;
