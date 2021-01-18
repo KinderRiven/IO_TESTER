@@ -23,6 +23,14 @@ public:
     PMEMoid nodes[128];
 };
 
+static void create_pmem_file(const char* path, size_t psize)
+{
+    int _is_pmem;
+    size_t _mmap_len;
+    void _addr = pmem_map_file(path, psize, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
+    printf("[addr:0x%x][mmap_len:%zu][is_pmem:%d]\n", (uint64_t)_addr, _mmap_len, _is_pmem);
+}
+
 static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t psize)
 {
     PMEMobjpool* _pool = nullptr;
@@ -41,6 +49,8 @@ int main(int argc, char** argv)
     char _path[128] = "/home/pmem0/pool";
     char _layout1[128] = "index";
     char _layout2[128] = "data";
+
+    create_pmem_file(_path, _pool_size * 10);
 
     PMEMobjpool* _p1 = create_one_pool(_path, _layout1, _pool_size);
     if (_p1 == nullptr) {
