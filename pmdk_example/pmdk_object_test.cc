@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     // }
 
     PMEMoid _proot = pmemobj_root(_p1, sizeof(proot_t));
-    proot_t* _mroot = pmemobj_direct(_proot);
+    proot_t* _mroot = (proot_t*)pmemobj_direct(_proot);
     printf("%d %d %d\n", _mroot->a, _mroot->b, _mroot->c);
     _mroot->a = 1;
     _mroot->b = 2;
