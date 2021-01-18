@@ -13,34 +13,24 @@
 #include "pmdk/libpmemlog.h"
 #include "pmdk/libpmemobj.h"
 
+static void create_one_pool(const char* path, const char* layout, size_t psize)
+{
+    PMEMobjpool* _pool;
+    _pool = pmemobj_create(path, layout, psize);
+
+    if (_pool == nullptr) {
+        printf("%s-%s existed, now just open!\n", path, layout);
+        _pool = pmemobj_open(_path, layout);
+    }
+    return _pool;
+}
+
 int main(int argc, char** argv)
 {
-    int _is_pmem;
-    size_t _mmap_len;
     size_t _pool_size = 2UL * 1024 * 1024 * 1024;
-    PMEMobjpool* _index = nullptr;
-    PMEMobjpool* _data = nullptr;
-    const char _path[] = "/home/pmem0/pool";
+    char _path[128] = "/home/pmem0/pool";
+    char _layout[128] = "layout";
 
-    // void* addr = pmem_map_file(_path, (size_t)2 * 1024 * 1024 * 1024, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
-    _index = pmemobj_create(_path, "index", _pool_size, 0666);
-    if (_index == nullptr) {
-        printf("existed index!\n");
-        _index = pmemobj_open(_path, "index");
-    }
-    if (_index == nullptr) {
-        printf("errer create for index!\n");
-        exit(1);
-    }
-
-    _data = pmemobj_create(_path, "data", _pool_size, 0666);
-    if (_data == nullptr) {
-        printf("existed data!\n");
-        _data = pmemobj_open(_path, "data");
-    }
-    if (_data == nullptr) {
-        printf("errer create for data!\n");
-        exit(1);
-    }
+    PMEMobjpool* _pool = create_one_pool(_path, _layout, _pool_size);
     return 0;
 }
