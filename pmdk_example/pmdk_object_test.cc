@@ -26,7 +26,7 @@ int main(int argc, char** argv)
     _index = pmemobj_create(_path, "index", _pool_size, 0666);
     if (_index == nullptr) {
         printf("existed index!\n");
-        _index = pmemobj_open(_path, "data");
+        _index = pmemobj_open(_path, "index");
     }
     if (_index == nullptr) {
         printf("errer create for index!\n");
