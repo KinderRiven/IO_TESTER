@@ -27,7 +27,7 @@ static void create_pmem_file(const char* path, size_t psize)
 {
     int _is_pmem;
     size_t _mmap_len;
-    void *_addr = pmem_map_file(path, psize, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
+    void* _addr = pmem_map_file(path, psize, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
     printf("[addr:0x%x][mmap_len:%zu][is_pmem:%d]\n", (uint64_t)_addr, _mmap_len, _is_pmem);
 }
 
@@ -46,21 +46,22 @@ static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t
 int main(int argc, char** argv)
 {
     size_t _pool_size = 2UL * 1024 * 1024 * 1024;
-    char _path[128] = "/home/pmem0/pool";
+    char _path1[128] = "/home/pmem0/pool";
+    char _path2[128] = "/home/pmem0/pool";
     char _layout1[128] = "index";
     char _layout2[128] = "data";
 
-    create_pmem_file(_path, _pool_size * 10);
+    // create_pmem_file(_path, _pool_size * 10);
 
-    PMEMobjpool* _p1 = create_one_pool(_path, _layout1, _pool_size);
+    PMEMobjpool* _p1 = create_one_pool(_path1, _layout1, _pool_size);
     if (_p1 == nullptr) {
         printf("p1 is nullptr!\n");
     }
 
-    // PMEMobjpool* _p2 = create_one_pool(_path, _layout2, _pool_size);
-    // if (_p2 == nullptr) {
-    //     printf("p2 is nullptr!\n");
-    // }
+    PMEMobjpool* _p2 = create_one_pool(_path2, _layout2, _pool_size);
+    if (_p2 == nullptr) {
+        printf("p2 is nullptr!\n");
+    }
 
     PMEMoid _proot = pmemobj_root(_p1, sizeof(proot_t));
     proot_t* _mroot = (proot_t*)pmemobj_direct(_proot);
@@ -69,7 +70,7 @@ int main(int argc, char** argv)
         for (int i = 0; i < 4; i++) {
             node_t* __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
             if (__node == nullptr) {
-                pmemobj_alloc(_p1, &_mroot->nodes[i], sizeof(node_t), 1, nullptr, nullptr);
+                pmemobj_alloc(_p2, &_mroot->nodes[i], sizeof(node_t), 1, nullptr, nullptr);
                 __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
                 __node->value = 0;
             }
@@ -79,5 +80,6 @@ int main(int argc, char** argv)
         }
     }
     pmemobj_close(_p1);
+    pmemobj_close(_p2);
     return 0;
 }
