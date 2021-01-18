@@ -35,7 +35,6 @@ int main(int argc, char** argv)
 
     char _buff[128] = "hello, world!";
     int _res = pmemlog_append(_pool, _buff, strlen(_buff));
-
     printf("%d\n", _res);
     return 0;
 }
