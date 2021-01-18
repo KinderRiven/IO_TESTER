@@ -13,10 +13,13 @@
 #include "pmdk/libpmemlog.h"
 #include "pmdk/libpmemobj.h"
 
+struct node_t {
+    uint64_t value;
+};
+
 struct proot_t {
-    int a;
-    int b;
-    int c;
+public:
+    PMEMoid nodes[128];
 };
 
 static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t psize)
@@ -50,10 +53,13 @@ int main(int argc, char** argv)
 
     PMEMoid _proot = pmemobj_root(_p1, sizeof(proot_t));
     proot_t* _mroot = (proot_t*)pmemobj_direct(_proot);
-    printf("%d %d %d\n", _mroot->a, _mroot->b, _mroot->c);
-    _mroot->a++;
-    _mroot->b++;
-    _mroot->c++;
+
+    for (int i = 0; i < 4; i++) {
+        node_t* __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
+        printf("%d:%d\n", i, __node->value);
+        __node->value += i；
+    }
+
     pmemobj_close(_p1);
     return 0;
 }
