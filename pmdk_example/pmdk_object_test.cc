@@ -64,6 +64,7 @@ int main(int argc, char** argv)
         }
         printf("%d:%llu\n", i, __node->value);
         __node->value += i;
+        pmemobj_persist(_pool, __node, sizeof(node_t));
     }
 
     pmemobj_close(_p1);
