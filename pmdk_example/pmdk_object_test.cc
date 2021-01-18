@@ -15,12 +15,12 @@
 
 static void create_one_pool(const char* path, const char* layout, size_t psize)
 {
-    PMEMobjpool* _pool;
+    PMEMobjpool* _pool = nullptr;
     _pool = pmemobj_create(path, layout, psize);
 
     if (_pool == nullptr) {
         printf("%s-%s existed, now just open!\n", path, layout);
-        _pool = pmemobj_open(_path, layout);
+        _pool = pmemobj_open(path, layout);
     }
     return _pool;
 }
@@ -29,8 +29,17 @@ int main(int argc, char** argv)
 {
     size_t _pool_size = 2UL * 1024 * 1024 * 1024;
     char _path[128] = "/home/pmem0/pool";
-    char _layout[128] = "layout";
+    char _layout1[128] = "index";
+    char _layout2[128] = "data";
 
-    PMEMobjpool* _pool = create_one_pool(_path, _layout, _pool_size);
+    PMEMobjpool* _p1 = create_one_pool(_path, _layout1, _pool_size);
+    if (_p1 == nullptr) {
+        printf("p1 is nullptr!\n");
+    }
+
+    PMEMobjpool* _p2 = create_one_pool(_path, _layout2, _pool_size);
+    if (_p2 == nullptr) {
+        printf("p2 is nullptr!\n");
+    }
     return 0;
 }
