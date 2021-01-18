@@ -14,6 +14,7 @@
 #include "pmdk/libpmemobj.h"
 
 struct node_t {
+public:
     uint64_t value;
 };
 
@@ -56,6 +57,11 @@ int main(int argc, char** argv)
 
     for (int i = 0; i < 4; i++) {
         node_t* __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
+        if (__node == nullptr) {
+            pmemobj_alloc(_p1, &_mroot->nodes[i], sizeof(node_t), 1, nullptr, nullptr);
+            __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
+            __node->value = 0;
+        }
         printf("%d:%llu\n", i, __node->value);
         __node->value += i;
     }
