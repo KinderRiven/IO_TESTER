@@ -46,10 +46,10 @@ static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t
 int main(int argc, char** argv)
 {
     size_t _pool_size = 2UL * 1024 * 1024 * 1024;
-    char _path1[128] = "/home/pmem0/pool";
-    char _path2[128] = "/home/pmem0/pool";
-    char _layout1[128] = "index";
-    char _layout2[128] = "data";
+    char _path1[128] = "/home/pmem0/pool1";
+    char _path2[128] = "/home/pmem0/pool2";
+    char _layout1[128] = "pool1";
+    char _layout2[128] = "pool2";
 
     // create_pmem_file(_path, _pool_size * 10);
 
