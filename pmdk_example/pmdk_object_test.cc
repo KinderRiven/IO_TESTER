@@ -16,7 +16,7 @@
 static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t psize)
 {
     PMEMobjpool* _pool = nullptr;
-    _pool = pmemobj_create(path, layout, psize);
+    _pool = pmemobj_create(path, layout, psize, 0666);
 
     if (_pool == nullptr) {
         printf("%s-%s existed, now just open!\n", path, layout);
