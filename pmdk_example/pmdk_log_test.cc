@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     const char _path[] = "/home/pmem0/pool";
 
     // void* addr = pmem_map_file(_path, (size_t)2 * 1024 * 1024 * 1024, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
-    _pool = pmemlog_create(_path, (size_t)1024 * 1024 * 1024, 0666);
+    _pool = pmemlog_create(_path, (off_t)1024 * 1024 * 1024, 0666);
 
     if (_pool == nullptr) {
         _pool = pmemlog_open(_path);
