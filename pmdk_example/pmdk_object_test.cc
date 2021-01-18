@@ -13,7 +13,7 @@
 #include "pmdk/libpmemlog.h"
 #include "pmdk/libpmemobj.h"
 
-static void create_one_pool(const char* path, const char* layout, size_t psize)
+static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t psize)
 {
     PMEMobjpool* _pool = nullptr;
     _pool = pmemobj_create(path, layout, psize);
