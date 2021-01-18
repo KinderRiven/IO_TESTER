@@ -27,7 +27,7 @@ static void create_pmem_file(const char* path, size_t psize)
 {
     int _is_pmem;
     size_t _mmap_len;
-    void _addr = pmem_map_file(path, psize, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
+    void *_addr = pmem_map_file(path, psize, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
     printf("[addr:0x%x][mmap_len:%zu][is_pmem:%d]\n", (uint64_t)_addr, _mmap_len, _is_pmem);
 }
 
