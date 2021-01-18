@@ -57,7 +57,7 @@ int main(int argc, char** argv)
     for (int i = 0; i < 4; i++) {
         node_t* __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
         printf("%d:%llu\n", i, __node->value);
-        __node->value += i；
+        __node->value += i;
     }
 
     pmemobj_close(_p1);
