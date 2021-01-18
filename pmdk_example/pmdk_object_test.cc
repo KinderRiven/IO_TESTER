@@ -28,11 +28,19 @@ int main(int argc, char** argv)
         printf("existed index!\n");
         _index = pmemobj_open(_path, "data");
     }
+    if (_index == nullptr) {
+        printf("errer create for index!\n");
+        exit(1);
+    }
 
     _data = pmemobj_create(_path, "data", _pool_size, 0666);
     if (_data == nullptr) {
         printf("existed data!\n");
         _data = pmemobj_open(_path, "data");
+    }
+    if (_data == nullptr) {
+        printf("errer create for data!\n");
+        exit(1);
     }
     return 0;
 }
