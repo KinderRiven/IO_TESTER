@@ -66,7 +66,7 @@ int main(int argc, char** argv)
     PMEMoid _proot = pmemobj_root(_p1, sizeof(proot_t));
     proot_t* _mroot = (proot_t*)pmemobj_direct(_proot);
 
-    for (int j = 0; j < 1000000; j++) {
+    for (int j = 0; j < 100; j++) {
         for (int i = 0; i < 4; i++) {
             node_t* __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
             if (__node == nullptr) {
@@ -74,7 +74,7 @@ int main(int argc, char** argv)
                 __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
                 __node->value = 0;
             }
-            printf("%d:%llu[%llu/%llu]\n", i, __node->value, _mroot->nodes[i].pool_uuid_lo, _mroot->nodes[i].off);
+            printf("%d:%llu [%llu/%llu]\n", i, __node->value, _mroot->nodes[i].pool_uuid_lo, _mroot->nodes[i].off);
             __node->value += i;
             pmemobj_persist(_p1, __node, sizeof(node_t));
         }
