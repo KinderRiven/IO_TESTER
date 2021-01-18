@@ -25,5 +25,9 @@ int main(int argc, char** argv)
     assert(_pool != nullptr);
     size_t _nb = pmemlog_nbyte(_pool);
     printf("%zuMB\n", _nb / (1024 * 1024));
+
+    char _buff[128] = "hello, world!";
+    int _res = pmemlog_append(_pool, _buff, strlen(_buff));
+    printf("%d\n", _res);
     return 0;
 }

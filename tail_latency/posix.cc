@@ -100,6 +100,7 @@ void do_randwrite(struct worker_options* options)
 
         options->vec_latency.push_back(_latency.Get());
         _timer.Stop();
+
         if (_timer.Get() > _run_time) {
             break;
         }
@@ -122,6 +123,7 @@ void do_randwrite(struct worker_options* options)
     printf("[%d][RANDOM_WRITE][%zu/%zu:%lluus][%zu/%zu:%lluus]\n",
         _fd, _p99_size, _size, options->vec_latency[_p99_size] / 1000,
         _p999_size, _size, options->vec_latency[_p999_size] / 1000);
+
     free(_buff);
 }
 
@@ -140,6 +142,7 @@ void do_seqwrite(struct worker_options* options)
     memset(_buff, 0xff, _bs);
 
     _timer.Start();
+
     while (true) {
         _latency.Start();
         pwrite(_fd, _buff, _bs, _pos);
@@ -147,10 +150,10 @@ void do_seqwrite(struct worker_options* options)
 
         options->vec_latency.push_back(_latency.Get());
         _timer.Stop();
+
         if (_timer.Get() > _run_time) {
             break;
         }
-
         _pos += _bs;
         if (_pos > _fs) {
             _pos = 0;
@@ -234,13 +237,16 @@ void do_seqread(struct worker_options* options)
     posix_memalign(&_buff, _bs, _bs);
 
     _timer.Start();
+
     while (true) {
+
         _latency.Start();
         pread(_fd, _buff, _bs, _pos);
         _latency.Stop();
 
         options->vec_latency.push_back(_latency.Get());
         _timer.Stop();
+
         if (_timer.Get() > _run_time) {
             break;
         }
@@ -337,7 +343,7 @@ int main(int argc, char** argv)
     size_t _read_block_size = atol(argv[9]);
 
     int _num_thread = _num_write_thread + _num_read_thread;
-
+     
     // use script to create test file
     for (int i = 0; i < _num_thread; i++) {
         int __fd;

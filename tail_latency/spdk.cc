@@ -282,7 +282,7 @@ int main(int argc, char** argv)
     struct tm* _lt = localtime(&_t);
     sprintf(g_save_path, "%04d%02d%02d_%02d%02d%02d_%d-%.2f", _lt->tm_year, _lt->tm_mon, _lt->tm_mday, _lt->tm_hour, _lt->tm_min, _lt->tm_sec, _io_depth, _read_ratio);
     mkdir(g_save_path, 0777);
-
+    
     do_readwrite(&_dev, &_options);
 
     spdk_nvme_detach(_dev.ctrlr);

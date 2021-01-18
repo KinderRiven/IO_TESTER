@@ -85,11 +85,43 @@ void do_seqwrite(int fd, size_t block_size, size_t total_size)
     free(vbuff);
 }
 
-void do_randwrite(int fd, size_t block_size, size_t total_size)
+void do_seqread(int fd, size_t block_size, size_t total_size)
 {
+    int ret;
+    void* vbuff;
+    size_t queue_size = io_depth;
+    size_t current_count = 0;
+    posix_memalign(&vbuff, block_size, block_size * queue_size);
+    char* buff = (char*)vbuff;
+    memset(buff, 0xff, block_size * queue_size);
+    size_t count = total_size / (block_size * queue_size);
+    aio_context_t ioctx;
+    struct iocb iocb[128];
+    struct io_event events[128];
+    struct iocb* iocbs[128];
+
+    ioctx = 0;
+    io_setup(128, &ioctx);
+    for (int i = 0; i < count; i++) {
+        for (int j = 0; j < queue_size; j++) {
+            iocb[j].aio_fildes = fd;
+            iocb[j].aio_nbytes = block_size;
+            iocb[j].aio_offset = block_size * current_count;
+            iocb[j].aio_lio_opcode = IOCB_CMD_PWRITE;
+            iocb[j].aio_buf = (uint64_t)&buff[j * block_size];
+            iocbs[j] = &iocb[j];
+            current_count++;
+        }
+        ret = io_submit(ioctx, queue_size, iocbs);
+        assert(ret == queue_size);
+        ret = io_getevents(ioctx, ret, ret, events, nullptr);
+        assert(ret == queue_size);
+    }
+    io_destroy(ioctx);
+    free(vbuff);
 }
 
-void do_seqread(int fd, size_t block_size, size_t total_size)
+void do_randwrite(int fd, size_t block_size, size_t total_size)
 {
 }
 
