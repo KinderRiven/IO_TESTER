@@ -16,7 +16,7 @@ int main(int argc, char** argv)
 {
     int _is_pmem;
     size_t _mmap_len;
-    PMEMlogpool* _pool;
+    PMEMlogpool* _pool = nullptr;
     const char _path[] = "/home/pmem0/pool";
 
     // void* addr = pmem_map_file(_path, (size_t)2 * 1024 * 1024 * 1024, PMEM_FILE_CREATE, 0666, &_mmap_len, &_is_pmem);
@@ -25,7 +25,6 @@ int main(int argc, char** argv)
     if (_pool == nullptr) {
         _pool = pmemlog_open(_path);
     }
-
     if (_pool == nullptr) {
         perror(_path);
         exit(1);
