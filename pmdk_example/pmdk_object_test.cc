@@ -13,6 +13,12 @@
 #include "pmdk/libpmemlog.h"
 #include "pmdk/libpmemobj.h"
 
+struct proot_t {
+    int a;
+    int b;
+    int c;
+};
+
 static PMEMobjpool* create_one_pool(const char* path, const char* layout, size_t psize)
 {
     PMEMobjpool* _pool = nullptr;
@@ -37,9 +43,17 @@ int main(int argc, char** argv)
         printf("p1 is nullptr!\n");
     }
 
-    PMEMobjpool* _p2 = create_one_pool(_path, _layout2, _pool_size);
-    if (_p2 == nullptr) {
-        printf("p2 is nullptr!\n");
-    }
+    // PMEMobjpool* _p2 = create_one_pool(_path, _layout2, _pool_size);
+    // if (_p2 == nullptr) {
+    //     printf("p2 is nullptr!\n");
+    // }
+
+    PMEMoid _proot = pmemobj_root(_p1, sizeof(proot_t));
+    proo_t* _mroot = pmemobj_direct(_proot);
+    printf("%d %d %d\n", _mroot->a, _mroot->b, _mroot->c);
+    _mroot->a = 1;
+    _mroot->b = 2;
+    _mroot->c = 3;
+    pmemobj_close(_p1);
     return 0;
 }
