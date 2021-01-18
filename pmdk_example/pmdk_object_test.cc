@@ -63,12 +63,11 @@ int main(int argc, char** argv)
                 __node = (node_t*)pmemobj_direct(_mroot->nodes[i]);
                 __node->value = 0;
             }
-            printf("%d:%llu\n", i, __node->value);
+            printf("%d:%llu[%llu/%llu]\n", i, __node->value, _mroot->nodes[i].pool_uuid_lo, _mroot->nodes[i].off);
             __node->value += i;
             pmemobj_persist(_p1, __node, sizeof(node_t));
         }
     }
-
     pmemobj_close(_p1);
     return 0;
 }
